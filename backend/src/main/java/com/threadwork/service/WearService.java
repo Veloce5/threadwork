@@ -55,9 +55,8 @@ public class WearService {
             throw bad(found.get(id).getName()+" is currently "+found.get(id).getStatus().toLowerCase(Locale.ROOT)+". Only available garments can be logged as worn today.");
         WearEvent event=events.save(new WearEvent(date,outfit==null?null:outfit.getId(),
             outfit==null?null:outfit.getName(),notes,ids));
-        List<WearEvent> all=events.findAll();
         for(Long id:ids){
-            long count=all.stream().filter(e->e.getGarmentIds().contains(id)).count();
+            long count=events.countByGarmentId(id);
             Garment g=found.get(id);
             g.setWearCount(count); // Derived from immutable events, not increased blindly.
             garments.save(g);

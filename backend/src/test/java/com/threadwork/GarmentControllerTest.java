@@ -41,7 +41,12 @@ class GarmentControllerTest {
             .file(new org.springframework.mock.web.MockMultipartFile("file","jacket.png","image/png",bytes.toByteArray())))
             .andExpect(status().isOk()).andExpect(jsonPath("$.imageUrl").exists());
         mvc.perform(get("/api/garments/"+id+"/photo")).andExpect(status().isOk())
-            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Content-Type","image/png"));
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Content-Type","image/png"))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string(
+                "Cache-Control",org.hamcrest.Matchers.allOf(
+                    org.hamcrest.Matchers.containsString("private"),
+                    org.hamcrest.Matchers.containsString("max-age=31536000"),
+                    org.hamcrest.Matchers.containsString("immutable"))));
         mvc.perform(get("/api/garments/"+id)).andExpect(jsonPath("$.season").value("AUTUMN"));
         mvc.perform(delete("/api/garments/"+id+"/photo")).andExpect(status().isOk())
             .andExpect(jsonPath("$.imageUrl").doesNotExist());
