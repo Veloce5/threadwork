@@ -3,6 +3,8 @@ package com.threadwork.service;
 import com.threadwork.model.*;
 import com.threadwork.repo.GarmentRepository;
 import com.threadwork.repo.OutfitRepository;
+import com.threadwork.repo.GarmentStatusEventRepository;
+import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -20,7 +22,10 @@ public class GarmentService {
     private final GarmentRepository repo;
     private final PhotoService photos;
     private final OutfitRepository outfits;
-    public GarmentService(GarmentRepository repo, PhotoService photos,OutfitRepository outfits) { this.repo = repo; this.photos=photos;this.outfits=outfits; }
+    private final GarmentStatusEventRepository events;
+    public GarmentService(GarmentRepository repo,PhotoService photos,OutfitRepository outfits,GarmentStatusEventRepository events) {
+        this.repo=repo;this.photos=photos;this.outfits=outfits;this.events=events;
+    }
 
     public List<Garment> list() { return repo.findAll().stream().sorted(Comparator.comparing(Garment::getCreatedAt).reversed()).toList(); }
     public Garment find(long id) { return repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garment not found")); }
@@ -31,9 +36,18 @@ public class GarmentService {
     public Garment update(long id, GarmentRequest form) {
         Garment g = find(id); apply(g, form); return repo.save(g);
     }
-    public Garment changeStatus(long id, String status) {
-        String next = requireStatus(status);
-        Garment g = find(id); g.setStatus(next); return repo.save(g);
+    @Transactional
+    public Garment changeStatus(long id,String status){return changeStatus(id,status,"MANUAL");}
+    @Transactional
+    public Garment changeStatus(long id,String status,String origin){
+        String next=requireStatus(status);
+        Garment g=find(id);
+        String previous=g.getStatus();
+        if(previous.equals(next))return g;
+        g.setStatus(next);
+        Garment saved=repo.save(g);
+        events.save(new GarmentStatusEvent(id,g.getName(),previous,next,origin));
+        return saved;
     }
     public void delete(long id) {
         Garment garment=find(id);
