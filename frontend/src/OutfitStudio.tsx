@@ -11,7 +11,7 @@ const names:Record<Slot,string>={TOPS:'Top or dress',BOTTOMS:'Bottom',FOOTWEAR:'
 const occasions:Occasion[]=['EVERYDAY','WORK','FORMAL','ACTIVE','OTHER'];
 const blank=():Record<Slot,number|null>=>({TOPS:null,BOTTOMS:null,FOOTWEAR:null,OUTERWEAR:null,ACCESSORIES:null});
 const slotFor=(g:Garment):Slot=>g.category==='DRESSES'?'TOPS':g.category;
-const nice=(v:string)=>v.toLowerCase().replace(/\\b\\w/g,c=>c.toUpperCase());
+const nice=(v:string)=>v.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
 const statusText=(v:string)=>v==='AVAILABLE'?'Ready to wear':nice(v);
 
 function ItemArt({item}:{item:Garment}){
