@@ -1,0 +1,55 @@
+/* Phase 5 — wear history and wardrobe analytics */
+.wa-root{min-width:0;color:#2b4035}.wa-phase{display:flex;align-items:center;gap:8px;font-size:11px;color:#3f7350;border:1px solid #d2e5d5;background:#edf5eb;padding:11px 14px;border-radius:30px;font-weight:700}
+.wa-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:26px 0 22px}
+.wa-metrics>div{background:white;border:1px solid #e0e6df;border-radius:11px;min-height:148px;padding:18px;display:grid;grid-template-columns:1fr auto;align-content:start;gap:12px}
+.wa-metrics span{font-size:10px;letter-spacing:.6px;color:#839083;font-weight:700}.wa-metrics svg{color:#93a297}
+.wa-metrics strong{grid-column:1/-1;font:600 35px Georgia,serif;color:#2b4938;line-height:1}
+.wa-metrics strong.wa-money{font-size:28px}.wa-metrics small{grid-column:1/-1;color:#98a398;font-size:10px}
+.wa-layout{display:grid;grid-template-columns:minmax(290px,.93fr) minmax(0,1.35fr);gap:18px;align-items:stretch}
+.wa-panel{background:#fff;border:1px solid #e2e8de;border-radius:12px;padding:24px;min-width:0}
+.wa-panel-head h2{font:600 28px Georgia,serif;color:#293e31;margin:10px 0}
+.wa-panel-head p{color:#829086;font-size:11px;line-height:1.7;margin:0 0 16px}.wa-panel-head .overline{color:#9d947d}
+.wa-tabs{display:flex;gap:9px;margin:14px 0}
+.wa-tabs button{flex:1;border:1px solid #dbe5dc;background:white;padding:11px;border-radius:7px;font-size:11px;font-weight:700;color:#607565;cursor:pointer}
+.wa-tabs button.selected{background:#2d4939;color:white;border-color:#2d4939}
+.wa-field{display:flex;flex-direction:column;gap:8px;font-size:11px;font-weight:700;color:#546954;margin:12px 0}
+.wa-field select,.wa-field input,.wa-field textarea,.wa-sort select{width:100%;box-sizing:border-box;min-height:42px;border:1px solid #dce5dc;border-radius:7px;background:#fafbf8;color:#304736;padding:10px;font-family:inherit;font-size:12px}
+.wa-submit{width:100%;display:flex;justify-content:center;align-items:center;gap:8px;border:0;border-radius:8px;color:white;background:#2b4838;padding:13px;font-size:12px;font-weight:700;cursor:pointer;margin-top:16px}
+.wa-submit:disabled{opacity:.45;cursor:not-allowed}
+.wa-warning{background:#fff5e7;padding:12px;border-radius:8px;font-size:11px;color:#98632f;line-height:1.6}
+.wa-disclaimer,.wa-footnote{font-size:10px;color:#8e9c90;line-height:1.7;margin-top:14px}
+.wa-chart{height:238px;display:flex;align-items:stretch;gap:8px;border-bottom:1px solid #e9eee8;margin-top:30px}
+.wa-chart-col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;align-items:center;gap:7px}
+.wa-chart-num{font-size:10px;color:#547257;height:13px}
+.wa-chart-track{flex:1;min-height:0;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.wa-chart-bar{background:#dbe6d9;width:68%;border-radius:5px 5px 0 0}
+.wa-chart-bar.active{background:linear-gradient(180deg,#819f83,#305b40)}
+.wa-chart-day{font-size:9px;color:#9aaba0;padding-bottom:6px}
+.wa-chart-footer{display:flex;align-items:start;gap:9px;color:#869a8a;font-size:11px;line-height:1.6;margin-top:19px}
+.wa-wide{margin-top:19px}.wa-inline{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.wa-sort{font-size:11px;display:flex;align-items:center;gap:8px;white-space:nowrap;color:#788e7a}
+.wa-sort select{width:166px}.wa-table-scroll{overflow:auto}
+.wa-table{width:100%;border-collapse:collapse;font-size:12px;text-align:left}
+.wa-table th{font-weight:700;color:#879989;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #e8eee6;padding:13px}
+.wa-table td{border-bottom:1px solid #eef1ed;padding:13px;color:#597061;vertical-align:middle}
+.wa-table tr:last-child td{border-bottom:0}
+.wa-table-piece{display:flex;gap:11px;align-items:center;min-width:170px}
+.wa-mini{width:49px;height:49px;background:#e7ebe5;border-radius:7px;color:#68826e;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.wa-mini img{height:100%;width:100%;object-fit:cover}
+.wa-table-piece span:last-child{display:flex;flex-direction:column;gap:6px}
+.wa-table-piece strong{color:#344939;font-size:11px}
+.wa-table-piece small{color:#9aaa9a;text-transform:capitalize;font-size:10px}
+.wa-empty{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:112px;text-align:center;font-size:12px;color:#88978b;gap:10px}
+.wa-empty button{border:none;text-decoration:underline;color:#3b6246;background:none;cursor:pointer}
+.wa-history{display:grid;gap:0;max-height:330px;overflow:auto}
+.wa-history article{border-bottom:1px solid #edf0ec;display:grid;grid-template-columns:130px minmax(0,1fr);gap:13px;padding:16px 0}
+.wa-history article:last-child{border-bottom:0}
+.wa-history-date{display:flex;gap:9px;align-items:center;color:#819382;font-size:11px}
+.wa-history article>div:last-child{display:flex;flex-direction:column;gap:7px}
+.wa-history strong{font-size:12px;color:#34513b}
+.wa-history small{font-size:10px;color:#90a091}
+.wa-banner{padding:13px 17px;border-radius:8px;display:flex;align-items:center;gap:10px;font-size:12px;margin:16px 0}
+.wa-banner span{flex:1}.wa-banner button{border:none;background:none;color:inherit;cursor:pointer}
+.wa-banner.error{background:#fff0e7;color:#a64d34}.wa-banner.success{background:#eaf6e7;color:#3e7847}
+@media(max-width:1100px){.wa-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.wa-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.wa-metrics{gap:9px}.wa-metrics>div{padding:12px;min-height:122px}.wa-metrics strong{font-size:27px}.wa-metrics strong.wa-money{font-size:20px}.wa-panel{padding:15px}.wa-chart{gap:3px}.wa-inline{align-items:flex-start;flex-direction:column}.wa-history article{grid-template-columns:1fr;gap:8px}}

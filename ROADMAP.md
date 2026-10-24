@@ -83,3 +83,5 @@ This plan intentionally separates **finished and tested functionality** from pro
 - [x] Dedicated Laundry Center screen with care pipeline, outfit recovery and history
 - [x] Automated Java tests for transitions, events and replacement integrity
 - [ ] Verify in a local browser with the user's saved outfits
+
+## Phase 5 implementation (2026-10-24)\n- [x] Date-stamped, append-only wear events linked to real outfit/garment IDs\n- [x] Server calculates actual recorded wear counts and zero-wear-safe cost-per-wear\n- [x] Historical logging that does not alter today's garment availability\n- [x] Today's logging updates laundry statuses with provenance\n- [x] Analytics screen with wear calendar bars, sortable costs, and event history\n- [x] Java integration checks for outfit wear, cost-per-wear and invalid entries\n- [ ] Confirm new page and recording workflow in local browser\n

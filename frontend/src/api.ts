@@ -39,6 +39,19 @@ export type OutfitAlternative = {
   garmentId:number;garmentName:string;reason:string;alternatives:Garment[];
 };
 export type OutfitInput = {name:string;occasion:Occasion;garmentIds:number[]};
+export type WearEvent = {
+  id:number;wornOn:string;outfitId:number|null;outfitName:string|null;
+  garmentIds:number[];notes:string;createdAt:string;
+};
+export type WearLogInput = {wornOn:string;outfitId?:number;garmentIds?:number[];notes:string};
+export type WearAnalyticsData = {
+  totalWearEvents:number;garmentWears:number;wornPieces:number;
+  neverLoggedPieces:number;wardrobeValue:number;
+  items:{garmentId:number;name:string;category:string;imageUrl:string|null;
+    purchasePrice:number;wearCount:number;costPerWear:number|null;
+    lastWorn:string|null;status:GarmentStatus;}[];
+  daily:{date:string;events:number;garmentWears:number}[];
+};
 export type Summary = { totalItems: number; availableItems: number; laundryItems: number; wardrobeValue: number; totalWears: number; savedOutfits: number; currency: string };
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
@@ -73,5 +86,8 @@ export const api = {
     request<Garment>(`/laundry/${id}/transition`,{method:'POST',...json({to})}),
   laundryHistory: () => request<StatusEvent[]>('/laundry/history'),
   outfitAlternatives: (id:number) => request<OutfitAlternative[]>(`/laundry/outfits/${id}/alternatives`),
+  wearHistory: () => request<WearEvent[]>('/wears'),
+  wearAnalytics: () => request<WearAnalyticsData>('/wears/analytics'),
+  logWear: (body:WearLogInput) => request<WearEvent>('/wears',{method:'POST',...json(body)}),
   seed: () => request<{created: number}>('/demo/seed', { method: 'POST' })
 };
