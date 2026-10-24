@@ -73,3 +73,13 @@ This plan intentionally separates **finished and tested functionality** from pro
 - [x] Named outfit saving, editing, deletion and lookbook previews
 - [x] JUnit integration checks for availability, updates and invalid items
 - [ ] Verify in user's browser after pulling to Mac
+
+## Phase 4 implementation (2026-10-24)
+- [x] Guided laundry actions with allowed transitions
+- [x] Status event history for both laundry steps and manual changes
+- [x] Wardrobe summary and saved outfit availability share the same garment status
+- [x] Deterministic same-category replacement suggestions with occasion/season ordering
+- [x] Explicit one-click apply replacement to a saved outfit
+- [x] Dedicated Laundry Center screen with care pipeline, outfit recovery and history
+- [x] Automated Java tests for transitions, events and replacement integrity
+- [ ] Verify in a local browser with the user's saved outfits

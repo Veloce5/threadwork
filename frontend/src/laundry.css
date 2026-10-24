@@ -1,0 +1,71 @@
+/* THREADWORK Phase 4 — Laundry Center */
+.lc-root{color:#2d4235;min-width:0}
+.lc-refresh,.lc-outline{display:inline-flex;gap:8px;align-items:center;border:1px solid #d5e0d5;border-radius:8px;background:white;color:#385844;font-weight:700;font-size:11px;padding:12px 15px;cursor:pointer}
+.lc-refresh:disabled,.lc-outline:disabled{opacity:.55}
+.lc-notice{display:flex;align-items:center;gap:10px;margin:16px 0;padding:13px 16px;border-radius:10px;font-size:12px}
+.lc-notice span{flex:1}
+.lc-notice button{border:0;background:none;cursor:pointer;color:inherit}
+.lc-error{background:#ffede7;color:#964d31}.lc-ok{background:#eaf5e7;color:#356642}
+.lc-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-top:24px}
+.lc-stats>div{border:1px solid #e2e8dd;border-radius:11px;background:#fff;padding:19px;display:flex;flex-direction:column;gap:8px}
+.lc-stats svg{color:#8b9f90;align-self:flex-end}
+.lc-stats small{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.65px;color:#819385}
+.lc-stats strong{font:600 36px Georgia,serif;color:#2b4535;line-height:1}
+.lc-stats span{color:#99a49a;font-size:10px}
+.lc-section-heading{display:flex;justify-content:space-between;align-items:end;gap:15px;margin:31px 0 18px}
+.lc-section-heading h2{font:600 27px Georgia,serif;color:#273c30;margin:8px 0 0}
+.lc-section-heading>small{font-size:11px;color:#87978a;max-width:260px;text-align:right}
+.lc-margin{margin-top:42px}
+.lc-cycle{display:flex;align-items:center;gap:7px;margin-bottom:20px;color:#7f9483}
+.lc-cycle div{padding:10px 16px;background:#e8eee5;color:#47654d;border-radius:8px;font-size:11px;font-weight:700}
+.lc-lanes{display:grid;gap:20px}
+.lc-lane{background:#fff;border:1px solid #e1e8df;padding:20px;border-radius:13px;min-width:0}
+.lc-lane-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.lc-lane-heading h3{font:600 23px Georgia,serif;margin:0 0 5px}
+.lc-lane-heading p{font-size:11px;color:#84978a;margin:0}
+.lc-lane-heading>span{background:#eaf0e8;color:#58765b;font-size:11px;font-weight:700;padding:8px 12px;border-radius:50%}
+.lc-no-items{background:#f7faf6;border:1px dashed #dce6dc;border-radius:8px;padding:16px;text-align:center;font-size:11px;color:#9ca99c}
+.lc-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.lc-item{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;align-items:start;border:1px solid #e8eee6;border-radius:9px;padding:10px}
+.lc-photo,.lc-placeholder{display:flex;width:76px;height:82px;object-fit:cover;align-items:center;justify-content:center;overflow:hidden;border-radius:7px}
+.lc-item-info{display:flex;flex-direction:column;gap:7px;padding:4px 0}
+.lc-item-info strong{font-size:12px;overflow-wrap:anywhere}
+.lc-item-info small{color:#8a998c;font-size:10px}
+.lc-item-actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.lc-item-actions button{flex:1;border:1px solid #dce5db;background:#fff;border-radius:7px;color:#43624d;font-size:10px;font-weight:700;cursor:pointer;padding:10px 8px}
+.lc-item-actions button.primary{background:#294838;color:#fff;border-color:#294838;display:flex;align-items:center;justify-content:center;gap:6px}
+.lc-item-actions button:disabled{opacity:.55;cursor:not-allowed}
+.lc-toggle-ready{width:100%;padding:14px;margin-top:16px;border:1px dashed #bed1bd;border-radius:9px;background:#f1f6ee;color:#527158;font-size:12px;font-weight:700;display:flex;gap:9px;justify-content:center;align-items:center;cursor:pointer}
+.lc-all-ready{border:1px solid #d8e9d5;border-radius:12px;background:#f3f9f1;padding:24px;display:flex;gap:13px;align-items:center;color:#4a7652}
+.lc-all-ready h3{font:600 21px Georgia,serif;margin:0 0 6px}
+.lc-all-ready p{font-size:11px;margin:0;color:#7d9481}
+.lc-affected-list{display:grid;gap:13px}
+.lc-affected{border:1px solid #e7dfce;background:#fff;border-radius:12px;padding:20px}
+.lc-affected-top{display:flex;gap:18px;justify-content:space-between;align-items:center}
+.lc-affected h3{font:600 22px Georgia,serif;margin:8px 0}
+.lc-affected p{font-size:11px;color:#926b40;line-height:1.6}
+.lc-suggestions{margin-top:18px;border-top:1px solid #e9e7df;padding-top:16px;display:grid;gap:17px}
+.lc-suggestion-group h4{margin:0 0 5px;font-size:12px;color:#3a503d}
+.lc-suggestion-group>small{font-size:10px;color:#8b8f83}
+.lc-suggestion-group p{font-size:11px;color:#986d51}
+.lc-alternative-list{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
+.lc-alternative-list button{display:flex;align-items:center;gap:9px;border:1px solid #dce6da;background:#f9fbf7;padding:6px 10px 6px 6px;border-radius:9px;cursor:pointer;max-width:240px}
+.lc-alternative-list .lc-photo,.lc-alternative-list .lc-placeholder{height:43px;width:43px;flex-shrink:0}
+.lc-alternative-list button span{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0}
+.lc-alternative-list button strong{font-size:11px;text-align:left}
+.lc-alternative-list button small{font-size:9px;color:#8b9f8c}
+.lc-alternative-list button svg:last-child{color:#749878}
+.lc-more-outfits{display:flex;justify-content:flex-end;margin-top:12px}
+.lc-more-outfits button{border:0;color:#426849;background:transparent;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;cursor:pointer}
+.lc-history{background:#fff;border:1px solid #e2e8df;border-radius:12px;padding:8px 17px;max-height:340px;overflow:auto}
+.lc-event{display:flex;gap:13px;align-items:center;padding:14px 0;border-bottom:1px solid #edf0ea}
+.lc-event:last-child{border-bottom:0}
+.lc-event-icon{display:flex;border-radius:7px;background:#edf3ec;padding:9px;color:#728e75}
+.lc-event>div:nth-child(2){display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.lc-event strong{font-size:11px}
+.lc-event span{color:#7b8e7e;font-size:10px}
+.lc-event time{font-size:10px;color:#93a295;text-align:right}
+.lc-empty-history{font-size:11px;line-height:1.7;color:#839385;padding:16px}
+.lc-note{font-size:11px;color:#829286;line-height:1.7;margin:17px 0 5px}
+@media(max-width:1150px){.lc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.lc-stats,.lc-card-grid{grid-template-columns:1fr}.lc-section-heading{align-items:start;flex-direction:column}.lc-section-heading>small{text-align:left}.lc-cycle{gap:3px}.lc-cycle div{padding:9px;font-size:9px}.lc-affected-top{flex-direction:column;align-items:stretch}.lc-event time{display:none}}

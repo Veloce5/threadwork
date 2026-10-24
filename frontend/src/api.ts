@@ -31,6 +31,13 @@ export type OutfitRecord = {
   warnings: string[];
   createdAt: string;
 };
+export type StatusEvent = {
+  id:number;garmentId:number;garmentName:string;fromStatus:GarmentStatus;toStatus:GarmentStatus;
+  origin:'MANUAL'|'LAUNDRY_WORKFLOW';changedAt:string;
+};
+export type OutfitAlternative = {
+  garmentId:number;garmentName:string;reason:string;alternatives:Garment[];
+};
 export type OutfitInput = {name:string;occasion:Occasion;garmentIds:number[]};
 export type Summary = { totalItems: number; availableItems: number; laundryItems: number; wardrobeValue: number; totalWears: number; savedOutfits: number; currency: string };
 
@@ -62,5 +69,9 @@ export const api = {
   createOutfit: (body: OutfitInput) => request<OutfitRecord>('/outfits',{method:'POST',...json(body)}),
   updateOutfit: (id:number,body:OutfitInput) => request<OutfitRecord>('/outfits/'+id,{method:'PUT',...json(body)}),
   deleteOutfit: (id:number) => request<void>('/outfits/'+id,{method:'DELETE'}),
+  laundryTransition: (id:number,to:GarmentStatus) =>
+    request<Garment>(`/laundry/${id}/transition`,{method:'POST',...json({to})}),
+  laundryHistory: () => request<StatusEvent[]>('/laundry/history'),
+  outfitAlternatives: (id:number) => request<OutfitAlternative[]>(`/laundry/outfits/${id}/alternatives`),
   seed: () => request<{created: number}>('/demo/seed', { method: 'POST' })
 };
