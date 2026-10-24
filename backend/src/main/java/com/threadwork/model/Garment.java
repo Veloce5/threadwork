@@ -20,8 +20,8 @@ public class Garment {
     @Column(nullable = false, length = 20) private String status = "AVAILABLE";
     @Column(nullable = false) private long wearCount = 0;
     @Column(length = 500) private String notes = "";
-    @Column(nullable = false, length = 20) private String season = "ALL_SEASONS";
-    @Column(nullable = false, length = 20) private String occasion = "EVERYDAY";
+    @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'ALL_SEASONS'") private String season = "ALL_SEASONS";
+    @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'EVERYDAY'") private String occasion = "EVERYDAY";
     @Column(length = 50) private String imageFile;
     @Column(nullable = false, updatable = false) private Instant createdAt;
 
