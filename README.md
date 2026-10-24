@@ -1,6 +1,6 @@
 # THREADWORK — Your Wardrobe OS
 
-Phase 2 adds photo-enabled wardrobe management to a Java 21/Spring Boot and React/TypeScript project.
+Phase 3 adds a persistent, interactive Outfit Studio to photo-enabled wardrobe management to a Java 21/Spring Boot and React/TypeScript project.
 
 ## Run locally
 Backend terminal:
@@ -21,7 +21,8 @@ Open http://127.0.0.1:5173. No API key required.
 - Photos: JPEG/PNG upload up to 4 MB, real pictures in item cards, detailed item view, replace/remove photos.
 - Season and occasion fields and advanced closet filters; sort by recency, name or price.
 - Dashboard counts and wardrobe value; demo wardrobe loader.
-- Planned in later phases: outfit studio, laundry-aware outfit optimizer, wear history, cost-per-wear, packing.
+- Phase 3: click or drag wardrobe items into five outfit slots; name, save, edit and delete looks. Saved outfits reference real garment IDs and immediately reflect their laundry/repair status.
+- Planned later: automated outfit ranking, wear history, cost-per-wear, full laundry center, packing.
 
 ## Photos and database
 - H2 defaults to `backend/data/threadwork.mv.db`; private image files are saved to `backend/data/photos`.
@@ -42,6 +43,11 @@ DELETE /api/garments/{id}
 POST   /api/garments/{id}/photo  (multipart file)
 GET    /api/garments/{id}/photo
 DELETE /api/garments/{id}/photo
+GET    /api/outfits
+POST   /api/outfits
+GET    /api/outfits/{id}
+PUT    /api/outfits/{id}
+DELETE /api/outfits/{id}
 GET    /api/summary
 POST   /api/demo/seed
 ```
@@ -50,4 +56,4 @@ POST   /api/demo/seed
 GitHub CI validates backend Maven tests and the React production build. Photo API tests cover upload, retrieval and bad-file rejection. Submit your hackathon work with proper disclosure of substantial AI assistance.
 
 ## Development plan
-See [ROADMAP.md](ROADMAP.md). Phase 3 will implement drag-and-drop outfit creation based on saved wardrobe records.
+See [ROADMAP.md](ROADMAP.md). Phase 4 will add expanded laundry workflows and alternate-outfit recommendations.

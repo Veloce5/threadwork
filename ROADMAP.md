@@ -64,3 +64,12 @@ This plan intentionally separates **finished and tested functionality** from pro
 - [ ] Video or live demo as required by event rules
 
 **SBUHacks-ready MVP target:** Phase 1–5 critical features plus Phase 6 basic availability-aware suggestions, with a deterministic onstage walkthrough.
+
+## Phase 3 implementation (2026-10-24)
+- [x] Spring Boot outfit CRUD API and persistent saved outfits
+- [x] Outfits reference real wardrobe garment IDs, not duplicate clothing data
+- [x] Live availability calculated from garment status; deleted pieces flagged
+- [x] Drag and click outfit canvas organized into five clothing slots
+- [x] Named outfit saving, editing, deletion and lookbook previews
+- [x] JUnit integration checks for availability, updates and invalid items
+- [ ] Verify in user's browser after pulling to Mac

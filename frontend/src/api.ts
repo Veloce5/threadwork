@@ -21,6 +21,17 @@ export type Garment = {
 };
 
 export type GarmentInput = Pick<Garment, 'name' | 'category' | 'brand' | 'color' | 'purchasePrice' | 'purchasedOn' | 'notes' | 'season' | 'occasion'>;
+export type OutfitRecord = {
+  id: number;
+  name: string;
+  occasion: Occasion;
+  garmentIds: number[];
+  garments: Garment[];
+  available: boolean;
+  warnings: string[];
+  createdAt: string;
+};
+export type OutfitInput = {name:string;occasion:Occasion;garmentIds:number[]};
 export type Summary = { totalItems: number; availableItems: number; laundryItems: number; wardrobeValue: number; totalWears: number; savedOutfits: number; currency: string };
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
@@ -47,5 +58,9 @@ export const api = {
     return request<Garment>(`/garments/${id}/photo`, {method:'POST',body});
   },
   removePhoto: (id: number) => request<Garment>(`/garments/${id}/photo`, {method:'DELETE'}),
+  outfits: () => request<OutfitRecord[]>('/outfits'),
+  createOutfit: (body: OutfitInput) => request<OutfitRecord>('/outfits',{method:'POST',...json(body)}),
+  updateOutfit: (id:number,body:OutfitInput) => request<OutfitRecord>('/outfits/'+id,{method:'PUT',...json(body)}),
+  deleteOutfit: (id:number) => request<void>('/outfits/'+id,{method:'DELETE'}),
   seed: () => request<{created: number}>('/demo/seed', { method: 'POST' })
 };
