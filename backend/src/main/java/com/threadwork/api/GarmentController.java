@@ -30,7 +30,7 @@ public class GarmentController {
     @GetMapping("/garments/{id}/photo")
     public ResponseEntity<byte[]> photo(@PathVariable long id) throws java.io.IOException {
         var photo=service.readPhoto(id);
-        return ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+        return ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.maxAge(java.time.Duration.ofDays(365)).cachePrivate().immutable())
             .contentType(photo.type()).body(photo.bytes());
     }
     @DeleteMapping("/garments/{id}/photo")
