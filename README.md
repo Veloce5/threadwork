@@ -1,6 +1,6 @@
 # THREADWORK — Your Wardrobe OS
 
-Phase 7 adds a persistent Outfit Calendar and compact travel packing planner using the existing Java 21/Spring Boot and React/TypeScript application.
+Phase 8 adds an internal data-integrity audit and safe local H2 backup scripts using the existing Java 21/Spring Boot and React/TypeScript application.
 
 ## Run locally
 Backend terminal:
@@ -25,7 +25,8 @@ Open http://127.0.0.1:5173. No API key required.
 - Phase 4: dedicated Laundry Center with guided stage transitions (Worn → Laundry → Drying → Ready), an append-only status change log, affected outfits and available replacement suggestions. You explicitly approve suggested swaps, preserving saved outfit data until then.
 - Phase 5: log a saved outfit or individual garment by date; store durable wear events; view recent activity, garment-level counts and cost per recorded wear. Today’s logged wears move available items to WORN, while past logs do not affect current garment availability.\n- Phase 6: automatic, explainable recommendations that first enforce garment availability and category requirements, then rank combinations using occasion/season labels and recorded wears. Save any recommended look to Outfit Studio. If the wardrobe has no complete available outfit, the app explicitly explains what's missing.
 - Phase 7: assign real saved looks to Morning/Afternoon/Evening on any date, with alerts for current unavailability and same-day shared garments. Reassigning the same date and slot replaces the earlier assignment. Plan a multi-day trip by activity tags and generate a compact reusable packing list.
-- Planned later: external weather integration, deployment, and authentication.
+- Phase 8: read-only Workspace Health audit for missing garment files, mismatched wear counts, deleted outfit pieces and orphan calendar references; a safe local H2+photos backup script and archive checker.
+- Still planned: authentication, deployment and optional sponsor integrations.
 
 ## Photos and database
 - H2 defaults to `backend/data/threadwork.mv.db`; private image files are saved to `backend/data/photos`.
@@ -62,6 +63,7 @@ GET    /api/planner/calendar?start=2026-10-24&end=2026-11-07
 PUT    /api/planner/calendar
 DELETE /api/planner/calendar/{id}
 POST   /api/planner/packing
+GET    /api/system/audit
 GET    /api/summary
 POST   /api/demo/seed
 ```
@@ -70,7 +72,7 @@ POST   /api/demo/seed
 GitHub CI validates backend Maven tests and the React production build. Photo API tests cover upload, retrieval and bad-file rejection. Submit your hackathon work with proper disclosure of substantial AI assistance.
 
 ## Development plan
-See [ROADMAP.md](ROADMAP.md). Phase 8: optional database and verification integrations, followed by deployment and demo hardening.
+See [ROADMAP.md](ROADMAP.md). Phase 9 will focus on authentication and deployment hardening. Optional Tiger Data, Snowflake, Gemini and ElevenLabs integrations remain unconnected until separately configured and verified.
 
 ## Laundry workflow behavior
 
@@ -92,3 +94,7 @@ Generated looks are temporary until the user explicitly saves one, at which poin
 Calendar assignments are persisted in the same H2 database as your garments. Every calendar slot represents one saved outfit on a specified day (Morning, Afternoon, Evening). Changing a saved outfit automatically updates its planned appearance. Deleting a referenced outfit leaves a clearly flagged calendar entry until the user replaces or removes it. Outfits that currently have unavailable clothing are warned about, but the application **does not predict availability on future dates**. Same-day reuse of pieces is a warning, not prohibited.
 
 The packing endpoint accepts 1–14 days, each with an activity/occasion. It uses the existing availability-aware recommendation engine and a bounded beam-search heuristic to reduce the number of distinct pieces. It assumes garments can be reused across days, and does not simulate laundry, weather, or storage constraints. The generated packing list and checkboxes are previews; nothing is marked as packed or worn in the database.
+
+## Phase 8 — Data integrity and backup
+
+Open **Workspace health** in the sidebar to run the read-only Java consistency audit. A clean audit does not replace a backup. For a local archive containing the real H2 database and photos, stop Spring Boot and run `bash scripts/backup-local.sh` from the repository root. See [docs/DATA_SAFETY.md](docs/DATA_SAFETY.md) for verification, recovery, privacy and optional PostgreSQL guidance. Do not publish backups or expose THREADWORK to the internet without authentication.

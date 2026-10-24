@@ -69,6 +69,16 @@ export type PackingResult = {
   days:{day:number;occasion:Occasion;garmentIds:number[];garments:Garment[];matchScore:number}[];
   packedItems:Garment[];totalItems:number;blockers:string[];assumptions:string[];
 };
+export type AuditReport = {
+  checkedAt:string;
+  database:string;
+  passed:boolean;
+  totals:{
+    garments:number;savedOutfits:number;calendarEntries:number;
+    wearEvents:number;statusChanges:number;attachedPhotos:number;
+  };
+  issues:{severity:'ERROR'|'WARNING';code:string;message:string}[];
+};
 export type Summary = { totalItems: number; availableItems: number; laundryItems: number; wardrobeValue: number; totalWears: number; savedOutfits: number; currency: string };
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
@@ -118,5 +128,6 @@ export const api = {
     request<PlannedLook>('/planner/calendar',{method:'PUT',...json({date,slot,outfitId})}),
   deleteAssignment: (id:number)=>request<void>('/planner/calendar/'+id,{method:'DELETE'}),
   packing: (body:PackingRequest)=>request<PackingResult>('/planner/packing',{method:'POST',...json(body)}),
+  audit: () => request<AuditReport>('/system/audit'),
   seed: () => request<{created: number}>('/demo/seed', { method: 'POST' })
 };

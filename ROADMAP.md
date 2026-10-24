@@ -103,3 +103,12 @@ This plan intentionally separates **finished and tested functionality** from pro
 - [x] Bounded beam-search heuristic minimizing distinct garments, with transparent assumptions
 - [x] Java API tests for calendar replacement, conflicts, packing and incomplete wardrobes
 - [ ] Confirm with actual local wardrobe after pulling the new version
+
+## Phase 8 implementation (2026-10-24)
+- [x] Java read-only integrity audit of saved garments, outfits, wear totals, photos, calendar links
+- [x] Transparent findings and totals in Workspace Health UI
+- [x] Local H2 database + photo backup script, archive structure verifier
+- [x] Updated privacy guidance and PostgreSQL migration warnings
+- [x] JUnit tests for clean state, wear count mismatch and deleted outfit references
+- [ ] Browser verification in the user's local app
+- [ ] External sponsor integrations: intentionally not connected without credentials and independent testing
