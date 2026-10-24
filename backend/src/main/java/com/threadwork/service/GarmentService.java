@@ -2,6 +2,7 @@ package com.threadwork.service;
 
 import com.threadwork.model.*;
 import com.threadwork.repo.GarmentRepository;
+import com.threadwork.repo.OutfitRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -18,7 +19,8 @@ public class GarmentService {
     private static final Set<String> OCCASIONS = Set.of("EVERYDAY","WORK","FORMAL","ACTIVE","OTHER");
     private final GarmentRepository repo;
     private final PhotoService photos;
-    public GarmentService(GarmentRepository repo, PhotoService photos) { this.repo = repo; this.photos=photos; }
+    private final OutfitRepository outfits;
+    public GarmentService(GarmentRepository repo, PhotoService photos,OutfitRepository outfits) { this.repo = repo; this.photos=photos;this.outfits=outfits; }
 
     public List<Garment> list() { return repo.findAll().stream().sorted(Comparator.comparing(Garment::getCreatedAt).reversed()).toList(); }
     public Garment find(long id) { return repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garment not found")); }
@@ -72,7 +74,7 @@ public class GarmentService {
         long totalWears=garments.stream().mapToLong(Garment::getWearCount).sum();
         return Map.of("totalItems",garments.size(),"availableItems",available,"laundryItems",inLaundry,
                       "wardrobeValue",value.setScale(2,RoundingMode.HALF_UP),"totalWears",totalWears,
-                      "savedOutfits",0,"currency","USD");
+                      "savedOutfits",outfits.count(),"currency","USD");
     }
 
     public Map<String, Object> seedDemo() {
