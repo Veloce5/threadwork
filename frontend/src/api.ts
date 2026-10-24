@@ -33,7 +33,7 @@ export type OutfitRecord = {
 };
 export type StatusEvent = {
   id:number;garmentId:number;garmentName:string;fromStatus:GarmentStatus;toStatus:GarmentStatus;
-  origin:'MANUAL'|'LAUNDRY_WORKFLOW';changedAt:string;
+  origin:'MANUAL'|'LAUNDRY_WORKFLOW'|'WEAR_LOG';changedAt:string;
 };
 export type OutfitAlternative = {
   garmentId:number;garmentName:string;reason:string;alternatives:Garment[];

@@ -147,7 +147,7 @@ export function LaundryCenter({items,onChanged,onGoOutfits}:{
     <div className="lc-history">{history.length===0?
       <p className="lc-empty-history">Changes will be recorded here starting with this version. Existing items are preserved, but older status changes cannot be reconstructed.</p>:
       history.map(event=><div className="lc-event" key={event.id}><div className="lc-event-icon"><Clock3 size={17}/></div>
-        <div><strong>{event.garmentName}</strong><span>{pretty(event.fromStatus)} → {pretty(event.toStatus)} · {event.origin==='MANUAL'?'Closet status menu':'Laundry workflow'}</span></div>
+        <div><strong>{event.garmentName}</strong><span>{pretty(event.fromStatus)} → {pretty(event.toStatus)} · {event.origin==='MANUAL'?'Closet status menu':event.origin==='WEAR_LOG'?'Wear journal':'Laundry workflow'}</span></div>
         <time dateTime={event.changedAt}>{new Date(event.changedAt).toLocaleString()}</time>
       </div>)}</div>
     <p className="lc-note">Status changes are stored persistently. Replacement options are deterministic matches by garment category, with occasion and season considered for ordering. No clothing is automatically marked washed, and suggested swaps are applied only when you select them.</p>
