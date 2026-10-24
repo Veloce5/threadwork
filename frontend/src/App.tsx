@@ -12,6 +12,7 @@ import { OutfitStudio } from './OutfitStudio';
 import { LaundryCenter } from './LaundryCenter';
 import { AnalyticsView } from './AnalyticsView';
 import { SmartOutfits } from './SmartOutfits';
+import { OutfitPlanner } from './OutfitPlanner';
 import type { Category, Garment, GarmentInput, GarmentStatus, Summary, Season, Occasion } from './api';
 
 type Page = 'dashboard'|'closet'|'outfits'|'recommendations'|'laundry'|'analytics'|'planner';
@@ -116,7 +117,7 @@ const navigation: {key:Page,title:string,icon:typeof Shirt,phase:string}[] = [
   {key:'recommendations',title:'Smart outfits',icon:Sparkles,phase:''},
   {key:'laundry',title:'Laundry center',icon:WashingMachine,phase:''},
   {key:'analytics',title:'Wardrobe analytics',icon:BarChart3,phase:''},
-  {key:'planner',title:'Outfit planner',icon:CalendarDays,phase:'Soon'}
+  {key:'planner',title:'Outfit planner',icon:CalendarDays,phase:''}
 ];
 function App(){
   const [items,setItems]=useState<Garment[]>([]);
@@ -188,11 +189,11 @@ function App(){
       })}</nav>
       <div className="sidebar-spacer" />
       <div className="sidebar-note"><Sparkles size={20}/><strong>A closet with intention.</strong><p>Make more of what you already own.</p><div className="sidebar-note-line"/></div>
-      <div className="sidebar-footer"><div className="avatar">TW</div><div><strong>My wardrobe</strong><span>Local workspace · Phase 6</span></div><ChevronDown size={15}/></div>
+      <div className="sidebar-footer"><div className="avatar">TW</div><div><strong>My wardrobe</strong><span>Local workspace · Phase 7</span></div><ChevronDown size={15}/></div>
     </aside>
     {mobileNav&&<div className="mobile-shade" onClick={()=>setMobileNav(false)}/>}
     <div className="app-main">
-      <header className="topbar"><button className="mobile-menu icon-button" onClick={()=>setMobileNav(true)} aria-label="Open menu"><Menu size={22}/></button><div className="breadcrumb">MY WORKSPACE <span>/</span> <strong>{phaseCard.title.toUpperCase()}</strong></div><div className="top-actions"><span className="version-pill"><span className="pulse-dot"/> SMART OUTFITS v0.6</span><button className="icon-button top-help" title="THREADWORK · Phase 6"><CircleHelp size={19}/></button></div></header>
+      <header className="topbar"><button className="mobile-menu icon-button" onClick={()=>setMobileNav(true)} aria-label="Open menu"><Menu size={22}/></button><div className="breadcrumb">MY WORKSPACE <span>/</span> <strong>{phaseCard.title.toUpperCase()}</strong></div><div className="top-actions"><span className="version-pill"><span className="pulse-dot"/> OUTFIT PLANNER v0.7</span><button className="icon-button top-help" title="THREADWORK · Phase 7"><CircleHelp size={19}/></button></div></header>
       <main className="main-content">
         {error&&<div className="alert error" role="alert"><span>{error}</span><button onClick={()=>{setError('');void reload()}}><RefreshCw size={15}/> Retry</button></div>}
         {page==='dashboard'&&<>
@@ -219,7 +220,8 @@ function App(){
          {page==='laundry'&&<LaundryCenter items={items} onChanged={reload} onGoOutfits={()=>changePage('outfits')}/>}
          {page==='analytics'&&<AnalyticsView items={items} onChanged={reload} onGoCloset={()=>changePage('closet')}/>}
          {page==='recommendations'&&<SmartOutfits onChanged={reload} onGoLaundry={()=>changePage('laundry')} onGoStudio={()=>changePage('outfits')}/>}
-         {!['dashboard','closet','outfits','recommendations','laundry','analytics'].includes(page)&&<div className="coming-content"><div className="overline"><span className="gold-line"/> NEXT IN OUR ROADMAP</div><h1>{phaseCard.title}<span>.</span></h1><p>We have intentionally not presented this as a finished feature. The clothing inventory comes first; this module will be connected to the same real wardrobe records in a later phase.</p><div className="coming-card"><div><phaseCard.icon size={38} strokeWidth={1.4}/></div><h2>Built thoughtfully, not rushed.</h2><p>{page==='outfits'?'Drag and drop real closet pieces into outfits, save sets, and reuse them.':page==='laundry'?'Track status transitions and automatically update available outfits.':page==='analytics'?'Explore cost-per-wear, wear history, and wardrobe usage over time.':'Schedule outfits, identify conflicts, and build efficient travel packing lists.'}</p><button className="button-dark" onClick={()=>changePage('closet')}>Back to my wardrobe <ArrowRight size={17}/></button></div></div>}
+         {page==='planner'&&<OutfitPlanner onGoOutfits={()=>changePage('outfits')} onGoLaundry={()=>changePage('laundry')}/>}
+         {!['dashboard','closet','outfits','recommendations','laundry','analytics','planner'].includes(page)&&<div className="coming-content"><div className="overline"><span className="gold-line"/> NEXT IN OUR ROADMAP</div><h1>{phaseCard.title}<span>.</span></h1><p>We have intentionally not presented this as a finished feature. The clothing inventory comes first; this module will be connected to the same real wardrobe records in a later phase.</p><div className="coming-card"><div><phaseCard.icon size={38} strokeWidth={1.4}/></div><h2>Built thoughtfully, not rushed.</h2><p>{page==='outfits'?'Drag and drop real closet pieces into outfits, save sets, and reuse them.':page==='laundry'?'Track status transitions and automatically update available outfits.':page==='analytics'?'Explore cost-per-wear, wear history, and wardrobe usage over time.':'Schedule outfits, identify conflicts, and build efficient travel packing lists.'}</p><button className="button-dark" onClick={()=>changePage('closet')}>Back to my wardrobe <ArrowRight size={17}/></button></div></div>}
       </main>
       <footer className="main-footer"><span>THREADWORK © 2026 · YOUR WARDROBE, INTENTIONALLY</span><span>JAVA 21 / SPRING BOOT / REACT <ArrowDownRight size={15}/></span></footer>
     </div>

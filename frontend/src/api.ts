@@ -59,6 +59,16 @@ export type RecommendationPack = {
   occasion:Occasion;season:Season;requireLayer:boolean;eligiblePieces:number;
   blockers:string[];suggestions:Recommendation[];
 };
+export type PlanSlot = 'MORNING'|'AFTERNOON'|'EVENING';
+export type PlannedLook = {
+  id:number;date:string;slot:PlanSlot;outfitId:number;outfitName:string;
+  garments:Garment[];usableNow:boolean;warnings:string[];
+};
+export type PackingRequest = {occasions:Occasion[];season:Season;requireLayer:boolean};
+export type PackingResult = {
+  days:{day:number;occasion:Occasion;garmentIds:number[];garments:Garment[];matchScore:number}[];
+  packedItems:Garment[];totalItems:number;blockers:string[];assumptions:string[];
+};
 export type Summary = { totalItems: number; availableItems: number; laundryItems: number; wardrobeValue: number; totalWears: number; savedOutfits: number; currency: string };
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
@@ -100,5 +110,13 @@ export const api = {
     const params=new URLSearchParams({occasion,season,requireLayer:String(requireLayer),limit:'8'});
     return request<RecommendationPack>('/recommendations?'+params.toString());
   },
+  calendar: (start:string,end:string)=>{
+    const params=new URLSearchParams({start,end});
+    return request<PlannedLook[]>('/planner/calendar?'+params.toString());
+  },
+  assignOutfit: (date:string,slot:PlanSlot,outfitId:number) =>
+    request<PlannedLook>('/planner/calendar',{method:'PUT',...json({date,slot,outfitId})}),
+  deleteAssignment: (id:number)=>request<void>('/planner/calendar/'+id,{method:'DELETE'}),
+  packing: (body:PackingRequest)=>request<PackingResult>('/planner/packing',{method:'POST',...json(body)}),
   seed: () => request<{created: number}>('/demo/seed', { method: 'POST' })
 };

@@ -1,6 +1,6 @@
 # THREADWORK — Your Wardrobe OS
 
-Phase 6 adds a deterministic Smart Outfit Generator using the existing Java 21/Spring Boot and React/TypeScript application.
+Phase 7 adds a persistent Outfit Calendar and compact travel packing planner using the existing Java 21/Spring Boot and React/TypeScript application.
 
 ## Run locally
 Backend terminal:
@@ -24,7 +24,8 @@ Open http://127.0.0.1:5173. No API key required.
 - Phase 3: click or drag wardrobe items into five outfit slots; name, save, edit and delete looks. Saved outfits reference real garment IDs and immediately reflect their laundry/repair status.
 - Phase 4: dedicated Laundry Center with guided stage transitions (Worn → Laundry → Drying → Ready), an append-only status change log, affected outfits and available replacement suggestions. You explicitly approve suggested swaps, preserving saved outfit data until then.
 - Phase 5: log a saved outfit or individual garment by date; store durable wear events; view recent activity, garment-level counts and cost per recorded wear. Today’s logged wears move available items to WORN, while past logs do not affect current garment availability.\n- Phase 6: automatic, explainable recommendations that first enforce garment availability and category requirements, then rank combinations using occasion/season labels and recorded wears. Save any recommended look to Outfit Studio. If the wardrobe has no complete available outfit, the app explicitly explains what's missing.
-- Planned later: outfit calendar, external weather integration, travel packing.
+- Phase 7: assign real saved looks to Morning/Afternoon/Evening on any date, with alerts for current unavailability and same-day shared garments. Reassigning the same date and slot replaces the earlier assignment. Plan a multi-day trip by activity tags and generate a compact reusable packing list.
+- Planned later: external weather integration, deployment, and authentication.
 
 ## Photos and database
 - H2 defaults to `backend/data/threadwork.mv.db`; private image files are saved to `backend/data/photos`.
@@ -57,6 +58,10 @@ GET    /api/wears
 POST   /api/wears
 GET    /api/wears/analytics
 GET    /api/recommendations?occasion=EVERYDAY&season=ALL_SEASONS&requireLayer=false&limit=8
+GET    /api/planner/calendar?start=2026-10-24&end=2026-11-07
+PUT    /api/planner/calendar
+DELETE /api/planner/calendar/{id}
+POST   /api/planner/packing
 GET    /api/summary
 POST   /api/demo/seed
 ```
@@ -65,7 +70,7 @@ POST   /api/demo/seed
 GitHub CI validates backend Maven tests and the React production build. Photo API tests cover upload, retrieval and bad-file rejection. Submit your hackathon work with proper disclosure of substantial AI assistance.
 
 ## Development plan
-See [ROADMAP.md](ROADMAP.md). Phase 7 will build the calendar planner and travel packing optimizer.
+See [ROADMAP.md](ROADMAP.md). Phase 8: optional database and verification integrations, followed by deployment and demo hardening.
 
 ## Laundry workflow behavior
 
@@ -81,3 +86,9 @@ A recorded wear is a durable event with a selected date, a snapshot of the parti
 The Java generator assembles ready-to-wear TOPS+BOTTOMS+FOOTWEAR or DRESSES+FOOTWEAR (optionally plus OUTERWEAR). It never pulls items marked WORN, LAUNDRY, DRYING or REPAIR. Occasion, season and recorded wear counts influence a deterministic ranking; these are **user-provided metadata heuristics**, not objective style ratings. The generator does not check live weather or product specifications. If no full outfit is available, the API provides actionable blockers rather than inventing results. Limit: 1–20 suggestions per request, with conservative computation bounds for large wardrobes.
 
 Generated looks are temporary until the user explicitly saves one, at which point the existing Outfit Studio persists real garment references.
+
+## Phase 7 — Calendar and packing rules
+
+Calendar assignments are persisted in the same H2 database as your garments. Every calendar slot represents one saved outfit on a specified day (Morning, Afternoon, Evening). Changing a saved outfit automatically updates its planned appearance. Deleting a referenced outfit leaves a clearly flagged calendar entry until the user replaces or removes it. Outfits that currently have unavailable clothing are warned about, but the application **does not predict availability on future dates**. Same-day reuse of pieces is a warning, not prohibited.
+
+The packing endpoint accepts 1–14 days, each with an activity/occasion. It uses the existing availability-aware recommendation engine and a bounded beam-search heuristic to reduce the number of distinct pieces. It assumes garments can be reused across days, and does not simulate laundry, weather, or storage constraints. The generated packing list and checkboxes are previews; nothing is marked as packed or worn in the database.

@@ -94,3 +94,12 @@ This plan intentionally separates **finished and tested functionality** from pro
 - [x] Integrated React Smart Outfits page with quick-save to existing outfit records
 - [x] JUnit tests for hard constraints, ranking, layering and validation
 - [ ] Local browser verification using real saved wardrobe after pulling
+
+## Phase 7 implementation (2026-10-24)
+- [x] Persistent morning/afternoon/evening outfit assignments, update and delete
+- [x] Warning for shared garments across same-day slots or currently unavailable items
+- [x] Two-week interactive calendar with selectable dates and saved outfits
+- [x] Activity-based multi-day packing preview using availability-aware Java combinations
+- [x] Bounded beam-search heuristic minimizing distinct garments, with transparent assumptions
+- [x] Java API tests for calendar replacement, conflicts, packing and incomplete wardrobes
+- [ ] Confirm with actual local wardrobe after pulling the new version
