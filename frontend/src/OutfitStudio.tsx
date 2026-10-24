@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DragEvent } from 'react';
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, CirclePlus, GripVertical, Heart, PackageCheck, Pencil, Plus, Save, Shirt, Sparkles, Trash2, X } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Check, CheckCircle2, GripVertical, Heart, PackageCheck, Pencil, Plus, Save, Shirt, Sparkles, Trash2, X } from 'lucide-react';
 import { api } from './api';
 import type { Garment, Occasion, OutfitRecord } from './api';
 import './outfits.css';
