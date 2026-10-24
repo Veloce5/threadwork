@@ -1,5 +1,7 @@
 export type Category = 'TOPS'|'BOTTOMS'|'OUTERWEAR'|'DRESSES'|'FOOTWEAR'|'ACCESSORIES';
 export type GarmentStatus = 'AVAILABLE'|'WORN'|'LAUNDRY'|'DRYING'|'REPAIR';
+export type Season = 'ALL_SEASONS'|'SPRING'|'SUMMER'|'AUTUMN'|'WINTER';
+export type Occasion = 'EVERYDAY'|'WORK'|'FORMAL'|'ACTIVE'|'OTHER';
 
 export type Garment = {
   id: number;
@@ -12,10 +14,13 @@ export type Garment = {
   status: GarmentStatus;
   wearCount: number;
   notes: string;
+  season: Season;
+  occasion: Occasion;
+  imageUrl: string | null;
   createdAt: string;
 };
 
-export type GarmentInput = Pick<Garment, 'name' | 'category' | 'brand' | 'color' | 'purchasePrice' | 'purchasedOn' | 'notes'>;
+export type GarmentInput = Pick<Garment, 'name' | 'category' | 'brand' | 'color' | 'purchasePrice' | 'purchasedOn' | 'notes' | 'season' | 'occasion'>;
 export type Summary = { totalItems: number; availableItems: number; laundryItems: number; wardrobeValue: number; totalWears: number; savedOutfits: number; currency: string };
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
@@ -37,5 +42,10 @@ export const api = {
   update: (id: number, body: GarmentInput) => request<Garment>(`/garments/${id}`, { method: 'PUT', ...json(body) }),
   status: (id: number, status: GarmentStatus) => request<Garment>(`/garments/${id}/status`, { method: 'PATCH', ...json({status}) }),
   remove: (id: number) => request<void>(`/garments/${id}`, { method: 'DELETE' }),
+  uploadPhoto: (id: number, file: File) => {
+    const body=new FormData(); body.append('file',file);
+    return request<Garment>(`/garments/${id}/photo`, {method:'POST',body});
+  },
+  removePhoto: (id: number) => request<Garment>(`/garments/${id}/photo`, {method:'DELETE'}),
   seed: () => request<{created: number}>('/demo/seed', { method: 'POST' })
 };

@@ -3,3 +3,28 @@
 @media(max-width:1100px){.dashboard-grid,.closet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom-row{grid-template-columns:1fr}.feature-banner{min-height:234px}}
 @media(max-width:790px){.sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .2s;width:260px}.sidebar.mobile-open{transform:translateX(0)}.mobile-shade{display:block;position:fixed;inset:0;background:#17271dd0;z-index:9}.mobile-menu{display:grid}.topbar{height:66px}.top-actions .top-help{display:none}.main-content{padding:25px 19px 36px}.topbar{padding:0 16px}.main-footer{padding:13px 18px}.page-heading h1{font-size:36px}.feature-banner{min-height:220px}.banner-copy{padding:25px 23px;width:60%}.banner-illustration{width:40%}.banner-copy h2{font-size:32px}.banner-copy>p{font-size:11px}.dashboard-grid,.closet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.garment-image{height:180px}}
 @media(max-width:520px){.breadcrumb{font-size:9px}.version-pill{display:none}.page-heading{align-items:flex-start;flex-direction:column}.page-heading h1{font-size:35px}.page-heading .button-dark{width:100%}.feature-banner{min-height:205px}.banner-illustration{width:30%}.banner-copy{width:70%}.banner-copy h2{font-size:29px}.banner-copy>p{max-width:260px}.banner-hanger svg{width:78px}.metrics-grid{gap:8px}.metric{min-height:115px;padding:13px}.metric>strong{font-size:30px}.metric>strong.money-value{font-size:22px}.metric>small{font-size:9px}.garment-grid{gap:9px}.garment-image{height:139px}.garment-body{padding:12px 10px}.garment-name-row h3{font-size:12px}.garment-meta{font-size:9px}.garment-foot{flex-direction:column;align-items:flex-start}.status-select{text-align:left;max-width:100%}.availability{font-size:8px;right:6px;top:7px}.cloth-icon{width:50px;height:50px}.section-top{align-items:start}.section-top h2{font-size:23px}.text-link{font-size:10px}.modal{padding:20px}.modal-grid{grid-template-columns:1fr;gap:12px}.field.full{grid-column:auto}.modal-header h2{font-size:27px}.modal-actions{flex-wrap:wrap}.collection-bar{align-items:start;flex-direction:column;gap:8px}.search-controls{flex-direction:column}.filter-select{max-width:200px}.main-footer>span:last-child{display:none}}
+
+/* Phase 2: photographic garment cards and richer profiles */
+.garment-image{display:block;border:0;padding:0;width:100%;text-align:inherit;cursor:pointer;overflow:hidden}
+.garment-photo{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.garment-image:hover .garment-photo{transform:scale(1.035)}
+.photo-drop{border:1px dashed #b2c1b2;border-radius:10px;background:#f3f6ef;padding:18px;display:flex;align-items:center;flex-direction:column;gap:8px;text-align:center;color:#506652;position:relative;cursor:pointer}
+.photo-drop span{font-size:12px;font-weight:700;overflow-wrap:anywhere}
+.photo-drop small{font-size:10px;color:#7c8b7e;font-weight:400}
+.photo-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-small-preview{width:95px;height:95px;border-radius:9px;object-fit:cover}
+.photo-error{font-size:11px;color:#a34329}
+.search-controls{flex-wrap:wrap;justify-content:flex-start}
+.search-input{flex:1 1 250px;max-width:none}
+.filter-select{flex:0 1 auto}
+.filter-select select{max-width:165px}
+.detail-hero{height:260px;border-radius:12px;background:#e0e5d9;overflow:hidden;margin-bottom:20px}
+.detail-hero>img{width:100%;height:100%;object-fit:contain}
+.detail-hero .cloth-art{height:100%}
+.detail-attributes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}
+.detail-attributes>div{padding:13px;border:1px solid #e3e7e0;border-radius:9px;background:white;min-width:0;display:flex;flex-direction:column;gap:7px}
+.detail-attributes small{font-size:10px;color:#859086}
+.detail-attributes strong{font-size:12px;color:#35483a;overflow-wrap:anywhere}
+.detail-notes{background:#f0f2ed;padding:15px;border-radius:9px}
+.detail-notes p{font-size:12px;line-height:1.6;margin-top:7px;white-space:pre-wrap}
+@media(max-width:600px){.detail-attributes{grid-template-columns:repeat(2,minmax(0,1fr))}.detail-hero{height:200px}.search-controls{flex-direction:column}.filter-select{max-width:none}}
