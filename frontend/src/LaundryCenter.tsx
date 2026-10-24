@@ -45,7 +45,8 @@ export function LaundryCenter({items,onChanged,onGoOutfits}:{
   },[]);
   useEffect(()=>{void refresh()},[refresh]);
   const problemOutfits=outfits.filter(o=>!o.available);
-  const byStatus=useMemo(()=>Object.fromEntries(lanes.map(x=>[x.status,items.filter(g=>g.status===x.status)]))
+  const byStatus=useMemo(()=>
+    Object.fromEntries(lanes.map(x=>[x.status,items.filter(g=>g.status===x.status)]))
       as Record<GarmentStatus,Garment[]>,[items]);
   const laundryCount=(byStatus.LAUNDRY?.length||0)+(byStatus.DRYING?.length||0);
   const inRotation=byStatus.AVAILABLE.length;
