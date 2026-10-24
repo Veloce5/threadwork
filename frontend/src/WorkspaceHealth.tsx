@@ -61,7 +61,7 @@ export function WorkspaceHealth(){
       <div className="wh-backup">
         <div><span className="wh-label">BACKUP CHECKPOINT</span><h3>Save your H2 database and clothing photos together.</h3>
           <p>On your Mac, close the Java backend first. From your actual Git repository, run the backup script:</p>
-          <code>./scripts/backup-local.sh</code>
+          <code>bash scripts/backup-local.sh</code>
           <p>The script creates a private compressed archive in your local <strong>backups/</strong> directory. Archives and photos are excluded from GitHub.</p>
         </div>
         <div className="wh-backup-caution"><AlertTriangle size={18}/><p>Backups are not automatic. This script is for the default local H2 database only; PostgreSQL/Tiger Data needs a separate database backup. Never upload an archive containing personal clothing photos to a public repository.</p></div>
