@@ -85,3 +85,12 @@ This plan intentionally separates **finished and tested functionality** from pro
 - [ ] Verify in a local browser with the user's saved outfits
 
 ## Phase 5 implementation (2026-10-24)\n- [x] Date-stamped, append-only wear events linked to real outfit/garment IDs\n- [x] Server calculates actual recorded wear counts and zero-wear-safe cost-per-wear\n- [x] Historical logging that does not alter today's garment availability\n- [x] Today's logging updates laundry statuses with provenance\n- [x] Analytics screen with wear calendar bars, sortable costs, and event history\n- [x] Java integration checks for outfit wear, cost-per-wear and invalid entries\n- [ ] Confirm new page and recording workflow in local browser\n
+## Phase 6 implementation (2026-10-24)
+- [x] Java garment availability and outfit feasibility filtering
+- [x] Explainable occasion and season preference ranking
+- [x] Handles conventional separates or dress + footwear
+- [x] Optional required outerwear constraint
+- [x] Empty-state reasons rather than inventing unavailable outfits
+- [x] Integrated React Smart Outfits page with quick-save to existing outfit records
+- [x] JUnit tests for hard constraints, ranking, layering and validation
+- [ ] Local browser verification using real saved wardrobe after pulling

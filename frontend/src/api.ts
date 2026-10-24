@@ -52,6 +52,13 @@ export type WearAnalyticsData = {
     lastWorn:string|null;status:GarmentStatus;}[];
   daily:{date:string;events:number;garmentWears:number}[];
 };
+export type Recommendation = {
+  garmentIds:number[];garments:Garment[];score:number;reasons:string[];title:string;
+};
+export type RecommendationPack = {
+  occasion:Occasion;season:Season;requireLayer:boolean;eligiblePieces:number;
+  blockers:string[];suggestions:Recommendation[];
+};
 export type Summary = { totalItems: number; availableItems: number; laundryItems: number; wardrobeValue: number; totalWears: number; savedOutfits: number; currency: string };
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
@@ -89,5 +96,9 @@ export const api = {
   wearHistory: () => request<WearEvent[]>('/wears'),
   wearAnalytics: () => request<WearAnalyticsData>('/wears/analytics'),
   logWear: (body:WearLogInput) => request<WearEvent>('/wears',{method:'POST',...json(body)}),
+  recommendations: (occasion:Occasion,season:Season,requireLayer:boolean) => {
+    const params=new URLSearchParams({occasion,season,requireLayer:String(requireLayer),limit:'8'});
+    return request<RecommendationPack>('/recommendations?'+params.toString());
+  },
   seed: () => request<{created: number}>('/demo/seed', { method: 'POST' })
 };
