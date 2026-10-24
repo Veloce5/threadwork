@@ -38,6 +38,9 @@ public class PhotoService {
         Files.write(directory.resolve(stored),bytes,StandardOpenOption.CREATE_NEW);
         return stored;
     }
+    public boolean existsStored(String stored) {
+        return safe(stored) && Files.isRegularFile(directory.resolve(stored));
+    }
     public Photo read(String stored) throws IOException {
         if(!safe(stored)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No photo attached.");
         Path image=directory.resolve(stored);
