@@ -1,6 +1,7 @@
 package com.threadwork.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,6 +20,9 @@ public class Garment {
     @Column(nullable = false, length = 20) private String status = "AVAILABLE";
     @Column(nullable = false) private long wearCount = 0;
     @Column(length = 500) private String notes = "";
+    @Column(nullable = false, length = 20) private String season = "ALL_SEASONS";
+    @Column(nullable = false, length = 20) private String occasion = "EVERYDAY";
+    @Column(length = 50) private String imageFile;
     @Column(nullable = false, updatable = false) private Instant createdAt;
 
     @PrePersist void onCreate() { if(createdAt == null) createdAt = Instant.now(); }
@@ -31,5 +35,9 @@ public class Garment {
     public String getStatus(){return status;} public void setStatus(String v){status=v;}
     public long getWearCount(){return wearCount;} public void setWearCount(long v){wearCount=v;}
     public String getNotes(){return notes;} public void setNotes(String v){notes=v;}
+    public String getSeason(){return season;} public void setSeason(String v){season=v;}
+    public String getOccasion(){return occasion;} public void setOccasion(String v){occasion=v;}
+    @JsonIgnore public String getImageFile(){return imageFile;} public void setImageFile(String v){imageFile=v;}
+    public String getImageUrl(){return imageFile==null?null:"/api/garments/"+id+"/photo?ref="+imageFile;}
     public Instant getCreatedAt(){return createdAt;}
 }

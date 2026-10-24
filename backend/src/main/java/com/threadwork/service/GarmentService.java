@@ -14,8 +14,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class GarmentService {
     private static final Set<String> CATEGORIES = Set.of("TOPS", "BOTTOMS", "OUTERWEAR", "DRESSES", "FOOTWEAR", "ACCESSORIES");
     private static final Set<String> STATUSES = Set.of("AVAILABLE", "WORN", "LAUNDRY", "DRYING", "REPAIR");
+    private static final Set<String> SEASONS = Set.of("ALL_SEASONS","SPRING","SUMMER","AUTUMN","WINTER");
+    private static final Set<String> OCCASIONS = Set.of("EVERYDAY","WORK","FORMAL","ACTIVE","OTHER");
     private final GarmentRepository repo;
-    public GarmentService(GarmentRepository repo) { this.repo = repo; }
+    private final PhotoService photos;
+    public GarmentService(GarmentRepository repo, PhotoService photos) { this.repo = repo; this.photos=photos; }
 
     public List<Garment> list() { return repo.findAll().stream().sorted(Comparator.comparing(Garment::getCreatedAt).reversed()).toList(); }
     public Garment find(long id) { return repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garment not found")); }
@@ -30,7 +33,36 @@ public class GarmentService {
         String next = requireStatus(status);
         Garment g = find(id); g.setStatus(next); return repo.save(g);
     }
-    public void delete(long id) { if (!repo.existsById(id)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Garment not found"); repo.deleteById(id); }
+    public void delete(long id) {
+        Garment garment=find(id);
+        repo.delete(garment);
+        photos.delete(garment.getImageFile());
+    }
+    public Garment uploadPhoto(long id, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        Garment garment = find(id);
+        String previous = garment.getImageFile();
+        String stored = photos.store(file);
+        try {
+            garment.setImageFile(stored);
+            Garment saved=repo.save(garment);
+            photos.delete(previous);
+            return saved;
+        } catch (RuntimeException e) {
+            photos.delete(stored);
+            throw e;
+        }
+    }
+    public PhotoService.Photo readPhoto(long id) throws java.io.IOException {
+        return photos.read(find(id).getImageFile());
+    }
+    public Garment removePhoto(long id) {
+        Garment garment=find(id);
+        String old=garment.getImageFile();
+        garment.setImageFile(null);
+        Garment saved=repo.save(garment);
+        photos.delete(old);
+        return saved;
+    }
 
     public Map<String, Object> summary() {
         List<Garment> garments=repo.findAll();
@@ -56,7 +88,7 @@ public class GarmentService {
         return Map.of("created", 8, "mode", "DEMO", "message", "Loaded eight clearly labeled sample garments");
     }
     private void createDemo(String name,String category,String color,String brand,double price,String notes){
-        create(new GarmentRequest(name,category,color,brand,BigDecimal.valueOf(price),LocalDate.now().minusMonths(2),notes));
+        create(new GarmentRequest(name,category,color,brand,BigDecimal.valueOf(price),LocalDate.now().minusMonths(2),notes,null,null));
     }
 
     private void apply(Garment g,GarmentRequest form) {
@@ -66,6 +98,13 @@ public class GarmentService {
         g.setName(form.name().trim()); g.setCategory(category); g.setColor(form.color().toUpperCase(Locale.ROOT));
         g.setBrand(form.brand()==null?"":form.brand().trim()); g.setPurchasePrice(form.purchasePrice());
         g.setPurchasedOn(form.purchasedOn());g.setNotes(form.notes()==null?"":form.notes().trim());
+        g.setSeason(choice(form.season(),"ALL_SEASONS",SEASONS,"season"));
+        g.setOccasion(choice(form.occasion(),"EVERYDAY",OCCASIONS,"occasion"));
+    }
+    private static String choice(String input,String fallback,Set<String> allowed,String field) {
+        String result=(input==null||input.isBlank())?fallback:input.trim().toUpperCase(Locale.ROOT);
+        if(!allowed.contains(result)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid "+field+": "+result);
+        return result;
     }
     private static String requireStatus(String status){
         if(status==null || !STATUSES.contains(status.toUpperCase(Locale.ROOT))) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unknown clothing status");

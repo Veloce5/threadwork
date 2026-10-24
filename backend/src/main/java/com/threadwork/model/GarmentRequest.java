@@ -11,5 +11,7 @@ public record GarmentRequest(
     @Size(max=60) String brand,
     @NotNull @DecimalMin("0.00") @Digits(integer=10, fraction=2) BigDecimal purchasePrice,
     LocalDate purchasedOn,
-    @Size(max=500) String notes
+    @Size(max=500) String notes,
+    String season,
+    String occasion
 ) {}

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import java.util.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api")
@@ -13,7 +14,7 @@ public class GarmentController {
     private final GarmentService service;
     public GarmentController(GarmentService service){this.service=service;}
 
-    @GetMapping("/health") public Map<String,String> health(){return Map.of("status","ok","app","THREADWORK","phase","1");}
+    @GetMapping("/health") public Map<String,String> health(){return Map.of("status","ok","app","THREADWORK","phase","2");}
     @GetMapping("/garments") public List<Garment> list(){return service.list();}
     @GetMapping("/garments/{id}") public Garment get(@PathVariable long id){return service.find(id);}
     @PostMapping("/garments") @ResponseStatus(HttpStatus.CREATED)
@@ -22,6 +23,18 @@ public class GarmentController {
     public record StatusRequest(String status) {}
     @PatchMapping("/garments/{id}/status") public Garment status(@PathVariable long id,@RequestBody StatusRequest request){return service.changeStatus(id,request.status());}
     @DeleteMapping("/garments/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) public void delete(@PathVariable long id){service.delete(id);}
+    @PostMapping(value="/garments/{id}/photo",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Garment photo(@PathVariable long id,@RequestPart("file") MultipartFile file) throws java.io.IOException {
+        return service.uploadPhoto(id,file);
+    }
+    @GetMapping("/garments/{id}/photo")
+    public ResponseEntity<byte[]> photo(@PathVariable long id) throws java.io.IOException {
+        var photo=service.readPhoto(id);
+        return ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+            .contentType(photo.type()).body(photo.bytes());
+    }
+    @DeleteMapping("/garments/{id}/photo")
+    public Garment deletePhoto(@PathVariable long id) { return service.removePhoto(id); }
     @GetMapping("/summary") public Map<String,Object> summary(){return service.summary();}
     @PostMapping("/demo/seed") public Map<String,Object> seed(){return service.seedDemo();}
 }
