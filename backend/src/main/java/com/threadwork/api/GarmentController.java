@@ -14,7 +14,7 @@ public class GarmentController {
     private final GarmentService service;
     public GarmentController(GarmentService service){this.service=service;}
 
-    @GetMapping("/health") public Map<String,String> health(){return Map.of("status","ok","app","THREADWORK","phase","4");}
+    @GetMapping("/health") public Map<String,String> health(){return Map.of("status","ok","app","THREADWORK","phase","5");}
     @GetMapping("/garments") public List<Garment> list(){return service.list();}
     @GetMapping("/garments/{id}") public Garment get(@PathVariable long id){return service.find(id);}
     @PostMapping("/garments") @ResponseStatus(HttpStatus.CREATED)
