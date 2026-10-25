@@ -138,9 +138,32 @@ function App(){
   const [busy,setBusy]=useState(false);
   const [notice,setNotice]=useState('');
   const [error,setError]=useState('');
+  const [backendCheck,setBackendCheck]=useState<'checking'|'ready'|'mismatch'>('checking');
+  const [backendIssue,setBackendIssue]=useState('');
   const [modal,setModal]=useState<Garment|boolean>(false);
   const [detail,setDetail]=useState<Garment|null>(null);
   
+  // Wardrobe data is stored by the currently running Java process, not by React.
+  // A stale server can return garment records while missing newer API features.
+  const verifyBackend=useCallback(async()=>{
+    setBackendCheck('checking');
+    try{
+      const health=await api.health();
+      if(health.app!=='THREADWORK'||health.status!=='ok'||!Number.isFinite(Number(health.phase))||Number(health.phase)<8){
+        setBackendIssue('A different or outdated Java backend is answering on port 8080. Your wardrobe totals may come from the wrong database. Stop that backend, then restart the current THREADWORK backend in its own folder.');
+        setBackendCheck('mismatch');
+        return;
+      }
+      await api.laundryHistory();
+      setBackendIssue('');
+      setBackendCheck('ready');
+    }catch(e){
+      setBackendIssue('Could not verify the current Java backend. '+(e as Error).message+' Check which process owns port 8080, restart from your THREADWORK backend folder, then retry.');
+      setBackendCheck('mismatch');
+    }
+  },[]);
+  useEffect(()=>{void verifyBackend()},[verifyBackend]);
+
   const reload=useCallback(async()=>{
     try{const [newItems,newSummary]=await Promise.all([api.garments(),api.summary()]);setItems(newItems);setSummary(newSummary);setError('');}
     catch(e){setError((e as Error).message)} finally{setLoading(false)}
@@ -191,6 +214,21 @@ function App(){
         <button className="button-dark tw-add" onClick={()=>setModal(true)}><Plus size={16}/><span>Add</span></button></header>
       {(()=>{const hub=hubs.find(h=>h.pages.includes(page));return hub&&hub.pages.length>1&&<nav className="tw-subnav" aria-label="Section pages">{hub.pages.map(k=><button key={k} aria-current={page===k?'page':undefined} className={page===k?'on':''} onClick={()=>changePage(k)}>{navigation.find(n=>n.key===k)!.title}</button>)}</nav>})()}
       <main className="main-content">
+        {backendCheck==='checking'?<section className="tw-compat-check" role="status">
+          <RefreshCw size={22} aria-hidden="true"/><h2>Checking your local Java backend…</h2>
+          <p>THREADWORK is verifying the wardrobe service before allowing changes.</p>
+        </section>:backendCheck==='mismatch'?<section className="tw-compat-check tw-compat-error" role="alert">
+          <CircleHelp size={28} aria-hidden="true"/><h2>THREADWORK needs the current backend</h2>
+          <p>{backendIssue}</p>
+          <ol>
+            <li>Stop older Java/Vite servers with Control+C in their terminals.</li>
+            <li>Make sure port 8080 is free; run the current backend from your original repository's <code>backend</code> directory.</li>
+            <li>Verify <code>http://localhost:8080/api/health</code> shows <code>"phase":"8"</code> and <code>http://localhost:8080/api/laundry/history</code> returns an array.</li>
+            <li>Before recording any new wears, confirm your saved outfits and history are present.</li>
+          </ol>
+          <button type="button" className="button-dark" onClick={()=>{void verifyBackend();void reload()}}><RefreshCw size={16}/> Check connection again</button>
+          <small>Existing clothes and photos have not been modified by this compatibility check.</small>
+        </section>:<>
         {error&&<div className="alert error" role="alert"><span>{error}</span><button onClick={()=>{setError('');void reload()}}><RefreshCw size={15}/> Retry</button></div>}
         {page==='dashboard'&&<Today items={items} summary={summary} loading={loading} busy={busy} onChanged={reload} onNotice={setNotice} onError={setError} onAdd={()=>setModal(true)} onSeed={()=>void doSeed()} onDetail={setDetail} go={changePage}/>}
         {page==='closet'&&<>
@@ -211,7 +249,7 @@ function App(){
          {page==='recommendations'&&<SmartOutfits onChanged={reload} onGoLaundry={()=>changePage('laundry')} onGoStudio={()=>changePage('outfits')}/>}
          {page==='planner'&&<OutfitPlanner onGoOutfits={()=>changePage('outfits')} onGoLaundry={()=>changePage('laundry')}/>}
          {page==='health'&&<WorkspaceHealth/>}
-
+        </>}
       </main>
       
     </div>

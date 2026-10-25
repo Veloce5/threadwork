@@ -121,3 +121,9 @@ To use your real wardrobe, back up and stop the original server first, then work
 ### Build verification
 
 From the project root: `mvn -f backend/pom.xml test` and `npm install --prefix frontend && npm run build --prefix frontend`. The working branch can also be tested through GitHub Actions. Never treat a syntax-only check as a successful production build.
+
+## Running the correct backend (Studio compatibility check)
+
+If Today reports `No static resource api/laundry/{id}/transition`, the browser is usually connected to a stale Java process, because the current backend implements this endpoint. It is possible for an older backend to return garment counts from a different local H2 database while lacking saved outfits, wear logs, or laundry routes.
+
+Stop any old Java/Vite servers with Control+C and inspect `lsof -nP -iTCP:8080 -sTCP:LISTEN`. From the **original project**, restart using `cd backend && mvn spring-boot:run`. The frontend expects this server on 8080. Check `curl -s http://localhost:8080/api/health` (it should include `"phase":"8"`) and `curl -s http://localhost:8080/api/laundry/history` (it should return an array). If totals still do not match the previous wardrobe, inspect the configured `DB_URL` and backend working directory before making any changes or attempting restoration; by default the H2 file is relative to the backend process's working directory. **Do not overwrite or delete any database.** The frontend now checks the backend identity and Laundry API before enabling its data-editing screens.

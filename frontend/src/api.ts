@@ -80,6 +80,7 @@ export type AuditReport = {
   issues:{severity:'ERROR'|'WARNING';code:string;message:string}[];
 };
 export type Summary = { totalItems: number; availableItems: number; laundryItems: number; wardrobeValue: number; totalWears: number; savedOutfits: number; currency: string };
+export type BackendHealth = { status:string; app:string; phase:string };
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   let response: Response;
@@ -87,13 +88,17 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   catch { throw new Error('Cannot reach the Java backend. Start Spring Boot on port 8080.'); }
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || error.message || error.error || `Request failed (${response.status})`);
+    const message=String(error.detail || error.message || error.error || `Request failed (${response.status})`);
+    if(response.status===404 && url.startsWith('/laundry/') && /No static resource|No handler|No endpoint/i.test(message))
+      throw new Error('This Java server does not have the Laundry API. Stop the outdated server on port 8080 and restart Spring Boot from your THREADWORK backend directory. No garment was updated.');
+    throw new Error(message);
   }
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
 const json = (body: unknown) => ({ headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 export const api = {
+  health: () => request<BackendHealth>('/health'),
   garments: () => request<Garment[]>('/garments'),
   summary: () => request<Summary>('/summary'),
   create: (body: GarmentInput) => request<Garment>('/garments', { method: 'POST', ...json(body) }),

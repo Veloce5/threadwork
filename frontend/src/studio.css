@@ -41,3 +41,12 @@ body{background:var(--tw-paper);color:var(--tw-ink)}
 @media(max-width:780px){.tw-nav{height:auto;min-height:67px;flex-wrap:wrap;padding:12px 18px 9px;gap:10px}.tw-brand{flex:1}.tw-brand span{font-size:22px}.tw-add{min-width:84px;height:39px;min-height:39px}.tw-hubs{order:3;width:100%;flex:0 0 100%;justify-content:flex-start;gap:4px;padding-bottom:2px}.tw-hubs button{font-size:11px}.tw-subnav{padding:10px 18px}.main-content{padding:25px 18px 60px}.tw-hero{padding:21px}.tw-hero-layout{grid-template-columns:1fr}.tw-piece-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tw-hello{align-items:start}.tw-hello-add{display:none}.tw-section-head>span{display:none}}
 @media(max-width:530px){.tw-hero{padding:17px;border-radius:13px}.tw-hero-layout{gap:24px}.tw-hero-top{align-items:flex-start}.tw-hero-planner{font-size:0;gap:5px}.tw-hero-planner svg{width:16px}.tw-piece-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tw-hero h2{font-size:33px}.tw-cols{grid-template-columns:1fr}.tw-cols .tw-card:last-child{grid-column:auto}.tw-card{min-height:0}.tw-hello h1{font-size:41px}.tw-queue-row{gap:6px}.tw-queue-row button{padding:8px 6px}}
 @media(prefers-reduced-motion:reduce){.tw-piece:hover{transform:none}*{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Prevent working against an old server or an unexpected local database. */
+.tw-compat-check{max-width:730px;margin:50px auto;background:#faf8f1;color:#304b36;border:1px solid #d9e2d5;padding:30px;border-radius:16px;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.tw-compat-check h2{font-family:Georgia,serif;font-size:27px;font-weight:500;margin:0}
+.tw-compat-check p,.tw-compat-check li{font-size:13px;line-height:1.75;margin:0;color:#5a7060}
+.tw-compat-check ol{padding-left:23px;margin:8px 0 14px}
+.tw-compat-check code{background:#e8ece4;border-radius:3px;padding:2px 5px;font-size:12px}
+.tw-compat-check small{color:#748675;font-size:11px;margin-top:3px}
+.tw-compat-error{border-color:#ddc6aa;background:#fffaf1}
