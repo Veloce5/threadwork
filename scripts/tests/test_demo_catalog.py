@@ -2,10 +2,12 @@
 import importlib.util
 from pathlib import Path
 import tempfile
+import sys
 import unittest
 from unittest.mock import patch
 
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
 spec=importlib.util.spec_from_file_location('demo_catalog',ROOT/'seed-wardrobe-catalog.py')
 demo=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(demo)
@@ -98,6 +100,56 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(count['created'],40)
             self.assertEqual(count['uploaded'],40)
             self.assertEqual(sum('TW-DEMO40' in g['notes'] for g in existing),0)
+
+    def test_offline_illustrations_are_valid_unique_pngs(self):
+        from demo_art import illustration_png
+        import struct
+        import zlib
+        pics=[]
+        for code, name, category, color, *_ in demo.DATA:
+            data=illustration_png(code,category,color)
+            self.assertTrue(data.startswith(b'\x89PNG\r\n\x1a\n'))
+            self.assertEqual(struct.unpack('!II',data[16:24]),(400,460))
+            self.assertIn(b'IDAT',data)
+            self.assertLess(len(data),4_000_000)
+            self.assertGreater(len(data),1000)
+            pics.append(data)
+        self.assertEqual(len(set(pics)),40)
+    def test_offline_image_import_never_calls_wikimedia(self):
+        garments=[{'id':i,'name':f'Existing piece {i}','notes':'', 'status':'AVAILABLE','imageUrl':None} for i in range(9)]
+        calls={'new':0,'photos':0}
+        def backend(base,path,body=None,**kw):
+            if path=='/api/health':return {'app':'THREADWORK','status':'ok','phase':'8'}
+            if path=='/api/laundry/history':return []
+            if path=='/api/summary':return {'totalItems':len(garments),'savedOutfits':3,'totalWears':12}
+            if path=='/api/garments' and body is None:return garments
+            if path=='/api/garments' and isinstance(body,dict):
+                g={**body,'id':len(garments)+1,'status':'AVAILABLE','imageUrl':None}
+                garments.append(g);calls['new']+=1;return g
+            ident=int(path.split('/')[3]);g=next(x for x in garments if x['id']==ident)
+            if path.endswith('/photo'):
+                self.assertTrue(body.startswith(b'--ThreadworkDemoUploadBound42'))
+                self.assertIn(b'\x89PNG\r\n\x1a\n',body)
+                g['imageUrl']=f'/api/garments/{ident}/photo?version=1'
+                calls['photos']+=1
+                return g
+            if path.endswith('/status'):g['status']=body['status'];return g
+            if isinstance(body,dict):g.update(body);return g
+            raise AssertionError(f'Unexpected request {path}')
+        with tempfile.TemporaryDirectory() as td,patch.object(demo,'api_request',side_effect=backend),\
+             patch.object(demo,'search_candidates',side_effect=AssertionError('Must not search Wikimedia')),\
+             patch.object(demo,'get_photo',side_effect=AssertionError('Must not download photos')),\
+             patch.object(demo,'credits_path',return_value=Path(td)/'credits.csv'):
+            self.assertEqual(demo.main(['--yes','--offline-images']),0)
+            self.assertEqual(len(garments),49)
+            self.assertEqual(calls,{'new':40,'photos':40})
+            self.assertEqual(len(demo.load_credits(Path(td)/'credits.csv')),40)
+            self.assertTrue(all('Illustration' in g['notes'] or 'illustration' in g['notes']
+                                for g in garments[9:]))
+            self.assertEqual(demo.main(['--yes','--offline-images']),0)
+            self.assertEqual(calls,{'new':40,'photos':40})
+            self.assertEqual(len(garments),49)
+            self.assertTrue(all('TW-DEMO40' not in g['notes'] for g in garments[:9]))
 
     def test_markup_attribution_text(self):
         self.assertEqual(demo.StripHTML().plain('Jane &amp; <b>John</b>'),'Jane & John')

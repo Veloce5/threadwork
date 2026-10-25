@@ -137,3 +137,15 @@ The catalog includes 11 tops, 8 bottoms, 5 outerwear, 4 dresses, 7 footwear, and
 The importer is repeat-safe: running it again fills missing images or unfinished entries without duplicating completed pieces. It has a preflight Commons photo check and reports all partial failures. If Commons is unavailable or image metadata does not meet the license criteria, retry later; the script **does not promise all 40 photos unless the final run reports success**. It requires internet access to Commons during import but afterwards photos are stored locally. Before importing into your real database, run `python3 scripts/seed-wardrobe-catalog.py --dry-run` to review the catalog and verify the server. The importer supports only localhost port 8080 to prevent accidental uploads elsewhere.
 
 Tests for the catalog (mocked image and backend network calls): `python3 -m unittest discover -s scripts/tests -v`.
+
+
+## Demo wardrobe photos when Wikimedia is rate-limited
+
+Wikimedia Commons can return HTTP 429. The 40-piece importer now supports **original offline clothing illustrations**, with one distinct PNG image per sample item. These are not actual product photographs. Run from the project root while the right local backend is running:
+
+```bash
+python3 scripts/seed-wardrobe-catalog.py --dry-run
+python3 scripts/seed-wardrobe-catalog.py --offline-images
+```
+
+The `--offline-images` flag makes zero outside photo requests, generates thumbnails using the Python standard library, and uploads them to the existing local photo API. The normal import mode still attempts Wikimedia Commons reference photos but falls back to illustrations when Commons blocks requests. Existing personal items, saved looks and wear history are not modified. Re-running is idempotent (the `TW-DEMO40` notes marker identifies catalog items). Local illustration credits are recorded in `backend/data/demo-photo-credits.csv` and garment notes; you may replace illustrations with photographs later.
