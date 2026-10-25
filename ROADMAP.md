@@ -112,3 +112,17 @@ This plan intentionally separates **finished and tested functionality** from pro
 - [x] JUnit tests for clean state, wear count mismatch and deleted outfit references
 - [ ] Browser verification in the user's local app
 - [ ] External sponsor integrations: intentionally not connected without credentials and independent testing
+
+## THREADWORK Studio — unified final interface
+- [x] V2-inspired Today dashboard replaces the old static welcome page
+- [x] Five-section top navigation with meaningful subnavigation for Looks and Insights
+- [x] Keep the complete original Outfit Studio, Smart Outfits, Laundry, Planner, Analytics, and Workspace Health
+- [x] Forest, ivory, brass design system shared across all screens and responsive layouts
+- [x] Daily garment images, personalized outfit planning and season/occasion discovery
+- [x] User confirmation before permanent wear log entries
+- [x] Confirmable care queue that reports partial failures and resynchronizes actual state
+- [x] Robust color sorting, and language distinguishing recorded wears from real-world usage
+- [x] No migrations; preserves the current backend API and source-of-truth H2 records
+- [ ] Run Maven and TypeScript/Vite build in an environment with dependencies
+- [ ] Browser verification on Mac with real data and on a narrow/mobile viewport
+- [ ] Do not publicly deploy until authenticated access and backup policy are in place

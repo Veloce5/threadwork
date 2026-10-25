@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CSSProperties, FormEvent, ReactNode } from 'react';
-import {
-  ArrowDownRight, ArrowRight, ArrowUpRight, BarChart3, CalendarDays, Check,
-  ChevronDown, CircleHelp, CirclePlus, Clock3,
-  Footprints, Heart, LayoutDashboard, Menu, MoreHorizontal,
-  PackageCheck, Palette, Plus, Search, Shirt, Sparkles, Tag, Trash2,
-  WashingMachine, X, SlidersHorizontal, Layers3, Pencil, RefreshCw, ImagePlus, Calendar
-} from 'lucide-react';
+import { ArrowRight, BarChart3, CalendarDays, Check, CircleHelp, CirclePlus, Clock3, Footprints, Heart, LayoutDashboard, MoreHorizontal, Palette, Plus, Search, Shirt, Sparkles, Tag, Trash2, WashingMachine, X, SlidersHorizontal, Layers3, Pencil, RefreshCw, ImagePlus, Calendar } from 'lucide-react';
 import { api } from './api';
 import { OutfitStudio } from './OutfitStudio';
 import { LaundryCenter } from './LaundryCenter';
@@ -14,6 +8,7 @@ import { AnalyticsView } from './AnalyticsView';
 import { SmartOutfits } from './SmartOutfits';
 import { OutfitPlanner } from './OutfitPlanner';
 import { WorkspaceHealth } from './WorkspaceHealth';
+import { Today } from './Today';
 import type { Category, Garment, GarmentInput, GarmentStatus, Summary, Season, Occasion } from './api';
 
 type Page = 'dashboard'|'closet'|'outfits'|'recommendations'|'laundry'|'analytics'|'planner'|'health';
@@ -26,7 +21,7 @@ const categories: { value: Category | 'ALL'; label: string }[] = [
 const statuses: GarmentStatus[] = ['AVAILABLE','WORN','LAUNDRY','DRYING','REPAIR'];
 const seasons: Season[] = ['ALL_SEASONS','SPRING','SUMMER','AUTUMN','WINTER'];
 const occasions: Occasion[] = ['EVERYDAY','WORK','FORMAL','ACTIVE','OTHER'];
-type SortOrder = 'NEWEST'|'NAME'|'PRICE_ASC'|'PRICE_DESC';
+type SortOrder = 'NEWEST'|'NAME'|'PRICE_ASC'|'PRICE_DESC'|'COLOR';
 const seasonLabel = (s:string) => s==='ALL_SEASONS'?'Year-round':titleCase(s);
 const money = (n: number) => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(n);
 const titleCase = (x: string) => x.toLowerCase().replace(/\b\w/g, c=>c.toUpperCase());
@@ -112,15 +107,23 @@ function GarmentDetails({item,onEdit,onClose,onRemovePhoto,busy}:{item:Garment,o
   </div>;
 }
 const navigation: {key:Page,title:string,icon:typeof Shirt,phase:string}[] = [
-  {key:'dashboard',title:'Overview',icon:LayoutDashboard,phase:''},
-  {key:'closet',title:'My wardrobe',icon:Shirt,phase:''},
+  {key:'dashboard',title:'Today',icon:LayoutDashboard,phase:''},
+  {key:'closet',title:'Closet',icon:Shirt,phase:''},
   {key:'outfits',title:'Outfit studio',icon:Palette,phase:''},
   {key:'recommendations',title:'Smart outfits',icon:Sparkles,phase:''},
-  {key:'laundry',title:'Laundry center',icon:WashingMachine,phase:''},
-  {key:'analytics',title:'Wardrobe analytics',icon:BarChart3,phase:''},
-  {key:'planner',title:'Outfit planner',icon:CalendarDays,phase:''},
+  {key:'planner',title:'Planner & packing',icon:CalendarDays,phase:''},
+  {key:'laundry',title:'Laundry',icon:WashingMachine,phase:''},
+  {key:'analytics',title:'Analytics',icon:BarChart3,phase:''},
   {key:'health',title:'Workspace health',icon:CircleHelp,phase:''}
 ];
+const hubs:{title:string,pages:Page[]}[]=[
+  {title:'Today',pages:['dashboard']},{title:'Closet',pages:['closet']},
+  {title:'Looks',pages:['outfits','recommendations','planner']},
+  {title:'Care',pages:['laundry']},{title:'Insights',pages:['analytics','health']}
+];
+const hueOf=(hex:string)=>{if(!/^#[0-9a-fA-F]{6}$/.test(hex))return 999;const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;if(d<0.08)return 400+(1-mx)*100;
+  const h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;return ((h*60)+360)%360};
 function App(){
   const [items,setItems]=useState<Garment[]>([]);
   const [summary,setSummary]=useState<Summary|null>(null);
@@ -137,7 +140,7 @@ function App(){
   const [error,setError]=useState('');
   const [modal,setModal]=useState<Garment|boolean>(false);
   const [detail,setDetail]=useState<Garment|null>(null);
-  const [mobileNav,setMobileNav]=useState(false);
+  
   const reload=useCallback(async()=>{
     try{const [newItems,newSummary]=await Promise.all([api.garments(),api.summary()]);setItems(newItems);setSummary(newSummary);setError('');}
     catch(e){setError((e as Error).message)} finally{setLoading(false)}
@@ -150,7 +153,7 @@ function App(){
       (occasionFilter==='ALL'||i.occasion===occasionFilter) &&
       (i.name+' '+i.brand+' '+i.category+' '+i.notes).toLowerCase().includes(query.trim().toLowerCase())
     );
-    found.sort((a,b)=>sort==='NAME'?a.name.localeCompare(b.name):
+    found.sort((a,b)=>sort==='COLOR'?hueOf(a.color)-hueOf(b.color):sort==='NAME'?a.name.localeCompare(b.name):
       sort==='PRICE_ASC'?a.purchasePrice-b.purchasePrice:
       sort==='PRICE_DESC'?b.purchasePrice-a.purchasePrice:
       new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime());
@@ -180,32 +183,16 @@ function App(){
     try{setBusy(true);await api.status(item.id,status);await reload();setNotice(`${item.name} is now ${titleCase(status)}.`);}
     catch(e){setError((e as Error).message)}finally{setBusy(false)}
   };
-  const changePage=(p:Page)=>{setPage(p);setMobileNav(false)};
-  const phaseCard=navigation.find(n=>n.key===page)!;
+  const changePage=(p:Page)=>{setPage(p);window.scrollTo({top:0})};
   return <div className="shell">
-    <aside className={'sidebar '+(mobileNav?'mobile-open':'')}>
-      <div className="logo-row"><div className="logo-mark"><Layers3 size={24} strokeWidth={1.7}/></div><div><div className="logo-text">threadwork<span>.</span></div><small>THE WARDROBE OS</small></div></div>
-      <div className="nav-label">WORKSPACE</div>
-      <nav className="nav-group" aria-label="Main navigation">{navigation.map(n=>{
-        const Icon=n.icon;return <button key={n.key} className={'nav-link '+(page===n.key?'active':'')} onClick={()=>changePage(n.key)}><Icon size={19} strokeWidth={1.8}/><span>{n.title}</span>{n.phase&&<small>{n.phase}</small>}</button>
-      })}</nav>
-      <div className="sidebar-spacer" />
-      <div className="sidebar-note"><Sparkles size={20}/><strong>A closet with intention.</strong><p>Make more of what you already own.</p><div className="sidebar-note-line"/></div>
-      <div className="sidebar-footer"><div className="avatar">TW</div><div><strong>My wardrobe</strong><span>Local workspace · Phase 8</span></div><ChevronDown size={15}/></div>
-    </aside>
-    {mobileNav&&<div className="mobile-shade" onClick={()=>setMobileNav(false)}/>}
     <div className="app-main">
-      <header className="topbar"><button className="mobile-menu icon-button" onClick={()=>setMobileNav(true)} aria-label="Open menu"><Menu size={22}/></button><div className="breadcrumb">MY WORKSPACE <span>/</span> <strong>{phaseCard.title.toUpperCase()}</strong></div><div className="top-actions"><span className="version-pill"><span className="pulse-dot"/> WORKSPACE HEALTH v0.8</span><button className="icon-button top-help" title="THREADWORK · Phase 8"><CircleHelp size={19}/></button></div></header>
+      <header className="tw-nav"><div className="tw-brand"><Layers3 size={22} strokeWidth={1.8}/><span>threadwork</span><em>WARDROBE STUDIO</em></div>
+        <nav className="tw-hubs" aria-label="Main navigation">{hubs.map(h=>{const on=h.pages.includes(page);return <button key={h.title} type="button" aria-current={on?'page':undefined} className={on?'on':''} onClick={()=>changePage(h.pages[0])}>{h.title}</button>})}</nav>
+        <button className="button-dark tw-add" onClick={()=>setModal(true)}><Plus size={16}/><span>Add</span></button></header>
+      {(()=>{const hub=hubs.find(h=>h.pages.includes(page));return hub&&hub.pages.length>1&&<nav className="tw-subnav" aria-label="Section pages">{hub.pages.map(k=><button key={k} aria-current={page===k?'page':undefined} className={page===k?'on':''} onClick={()=>changePage(k)}>{navigation.find(n=>n.key===k)!.title}</button>)}</nav>})()}
       <main className="main-content">
         {error&&<div className="alert error" role="alert"><span>{error}</span><button onClick={()=>{setError('');void reload()}}><RefreshCw size={15}/> Retry</button></div>}
-        {page==='dashboard'&&<>
-          <div className="page-heading"><div><div className="overline"><span className="gold-line"/> YOUR WARDROBE, REIMAGINED</div><h1>The everyday edit<span>.</span></h1><p>A more thoughtful way to organize everything you wear.</p></div><button className="button-dark" onClick={()=>setModal(true)}><Plus size={18}/> Add a piece</button></div>
-          <section className="feature-banner"><div className="banner-copy"><div className="overline bright">WELCOME TO THREADWORK <ArrowUpRight size={13}/></div><h2>Wear more of<br/><em>what you own.</em></h2><p>One beautifully organized place for your clothing, outfits, and everyday rituals.</p><button onClick={()=>changePage('closet')}>Explore my wardrobe <ArrowRight size={17}/></button></div><div className="banner-illustration" aria-hidden="true"><div className="banner-ring ring-1"/><div className="banner-ring ring-2"/><div className="banner-hanger"><Shirt size={125} strokeWidth={.65}/></div><span className="banner-edition">THE EVERYDAY EDIT · NO. 001</span></div></section>
-          <div className="metrics-grid"><div className="metric"><div><span>PIECES IN YOUR CLOSET</span><Shirt size={18}/></div><strong>{summary?.totalItems??'—'}</strong><small>Total collection</small></div><div className="metric"><div><span>READY TO WEAR</span><PackageCheck size={18}/></div><strong>{summary?.availableItems??'—'}</strong><small>Available right now</small></div><div className="metric"><div><span>IN THE LAUNDRY</span><WashingMachine size={18}/></div><strong>{summary?.laundryItems??'—'}</strong><small>Washing or drying</small></div><div className="metric"><div><span>WARDROBE VALUE</span><BarChart3 size={18}/></div><strong className="money-value">{summary?money(summary.wardrobeValue):'—'}</strong><small>Recorded purchase prices</small></div></div>
-          <div className="section-top"><div><div className="overline">CURATED FROM YOUR CLOSET</div><h2>Your latest pieces</h2></div><button className="text-link" onClick={()=>changePage('closet')}>View full wardrobe <ArrowUpRight size={17}/></button></div>
-          {loading?<div className="loading-tiles">Loading wardrobe…</div>:items.length? <div className="garment-grid dashboard-grid">{items.slice(0,4).map(item=><GarmentCard key={item.id} item={item} onDetail={()=>setDetail(item)} onEdit={()=>setModal(item)} onRemove={()=>void doRemove(item)} onStatus={s=>void doStatus(item,s)} busy={busy}/>)}</div>:<EmptyWardrobe onAdd={()=>setModal(true)} onDemo={()=>void doSeed()} busy={busy}/>}
-          <div className="bottom-row"><div className="insight-panel"><div className="panel-icon"><Sparkles size={23}/></div><div><span className="overline">NOW OPEN · OUTFIT STUDIO</span><h3>Outfit creation, without the chaos.</h3><p>Mix pieces you own, save combinations, and build your own personal uniform.</p></div><ArrowUpRight size={21}/></div><div className="quote-panel">“Style is what you make of what you have.”<span>THE THREADWORK PHILOSOPHY</span></div></div>
-        </>}
+        {page==='dashboard'&&<Today items={items} summary={summary} loading={loading} busy={busy} onChanged={reload} onNotice={setNotice} onError={setError} onAdd={()=>setModal(true)} onSeed={()=>void doSeed()} onDetail={setDetail} go={changePage}/>}
         {page==='closet'&&<>
           <div className="page-heading"><div><div className="overline"><span className="gold-line"/> PERSONAL COLLECTION</div><h1>My wardrobe<span>.</span></h1><p>Every piece, every detail, all in one place.</p></div><button className="button-dark" onClick={()=>setModal(true)}><Plus size={18}/> Add new piece</button></div>
           <div className="collection-bar"><span>{items.length} PIECES IN YOUR COLLECTION</span><span><Clock3 size={14}/> Saved locally and persistently</span></div>
@@ -214,7 +201,7 @@ function App(){
             <label className="filter-select"><SlidersHorizontal size={17}/><select aria-label="Filter status" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="ALL">Any status</option>{statuses.map(s=><option key={s} value={s}>{titleCase(s)}</option>)}</select></label>
             <label className="filter-select"><Calendar size={17}/><select aria-label="Filter season" value={seasonFilter} onChange={e=>setSeasonFilter(e.target.value as Season|'ALL')}><option value="ALL">All seasons</option>{seasons.filter(s=>s!=='ALL_SEASONS').map(s=><option key={s} value={s}>{seasonLabel(s)}</option>)}</select></label>
             <label className="filter-select"><Tag size={17}/><select aria-label="Filter occasion" value={occasionFilter} onChange={e=>setOccasionFilter(e.target.value as Occasion|'ALL')}><option value="ALL">Any occasion</option>{occasions.map(s=><option key={s} value={s}>{titleCase(s)}</option>)}</select></label>
-            <label className="filter-select"><select aria-label="Sort garments" value={sort} onChange={e=>setSort(e.target.value as SortOrder)}><option value="NEWEST">Newest</option><option value="NAME">Name A–Z</option><option value="PRICE_ASC">Price: low first</option><option value="PRICE_DESC">Price: high first</option></select></label>
+            <label className="filter-select"><select aria-label="Sort garments" value={sort} onChange={e=>setSort(e.target.value as SortOrder)}><option value="NEWEST">Newest</option><option value="COLOR">Color (rainbow)</option><option value="NAME">Name A–Z</option><option value="PRICE_ASC">Price: low first</option><option value="PRICE_DESC">Price: high first</option></select></label>
           </div></div>
           {loading?<div className="loading-tiles">Loading your closet…</div>:filtered.length?<div className="garment-grid closet-grid">{filtered.map(item=><GarmentCard key={item.id} item={item} onDetail={()=>setDetail(item)} onEdit={()=>setModal(item)} onRemove={()=>void doRemove(item)} onStatus={s=>void doStatus(item,s)} busy={busy}/>)}</div>:items.length?<div className="empty-filter"><Search size={30}/><h3>Nothing matches these filters.</h3><p>Try adjusting your search or choosing another category.</p><button className="button-outline" onClick={()=>{setQuery('');setStatusFilter('ALL');setCategory('ALL');setSeasonFilter('ALL');setOccasionFilter('ALL');setSort('NEWEST')}}>Reset filters</button></div>:<EmptyWardrobe onAdd={()=>setModal(true)} onDemo={()=>void doSeed()} busy={busy}/>}
         </>}
@@ -224,9 +211,9 @@ function App(){
          {page==='recommendations'&&<SmartOutfits onChanged={reload} onGoLaundry={()=>changePage('laundry')} onGoStudio={()=>changePage('outfits')}/>}
          {page==='planner'&&<OutfitPlanner onGoOutfits={()=>changePage('outfits')} onGoLaundry={()=>changePage('laundry')}/>}
          {page==='health'&&<WorkspaceHealth/>}
-         {!['dashboard','closet','outfits','recommendations','laundry','analytics','planner','health'].includes(page)&&<div className="coming-content"><div className="overline"><span className="gold-line"/> NEXT IN OUR ROADMAP</div><h1>{phaseCard.title}<span>.</span></h1><p>We have intentionally not presented this as a finished feature. The clothing inventory comes first; this module will be connected to the same real wardrobe records in a later phase.</p><div className="coming-card"><div><phaseCard.icon size={38} strokeWidth={1.4}/></div><h2>Built thoughtfully, not rushed.</h2><p>{page==='outfits'?'Drag and drop real closet pieces into outfits, save sets, and reuse them.':page==='laundry'?'Track status transitions and automatically update available outfits.':page==='analytics'?'Explore cost-per-wear, wear history, and wardrobe usage over time.':'Schedule outfits, identify conflicts, and build efficient travel packing lists.'}</p><button className="button-dark" onClick={()=>changePage('closet')}>Back to my wardrobe <ArrowRight size={17}/></button></div></div>}
+
       </main>
-      <footer className="main-footer"><span>THREADWORK © 2026 · YOUR WARDROBE, INTENTIONALLY</span><span>JAVA 21 / SPRING BOOT / REACT <ArrowDownRight size={15}/></span></footer>
+      
     </div>
     {modal!==false&&<Modal onClose={()=>setModal(false)}><GarmentForm initial={typeof modal==='object'?modal:undefined} save={doSave} busy={busy} onClose={()=>setModal(false)}/></Modal>}
     {detail!==null&&<Modal onClose={()=>setDetail(null)}><GarmentDetails item={detail} busy={busy} onClose={()=>setDetail(null)} onEdit={()=>{setDetail(null);setModal(detail)}} onRemovePhoto={()=>void doRemovePhoto(detail)}/></Modal>}

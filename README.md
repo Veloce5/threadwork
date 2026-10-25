@@ -1,6 +1,6 @@
-# THREADWORK — Your Wardrobe OS
+# THREADWORK Studio — Your Wardrobe OS
 
-Phase 8 adds an internal data-integrity audit and safe local H2 backup scripts using the existing Java 21/Spring Boot and React/TypeScript application.
+The final Studio release combines the original reliable wardrobe workflows with a new, daily-use **Today** home, five-section top navigation and a coherent forest, ivory and warm-brass interface. The backend remains Java 21 + Spring Boot; the frontend remains React + TypeScript; your H2 database remains compatible. No paid APIs or authentication dependencies are needed for local use.
 
 ## Run locally
 Backend terminal:
@@ -19,13 +19,14 @@ Open http://127.0.0.1:5173. No API key required.
 ## Available functionality
 - Persistent wardrobe with add/edit/delete, category, brand, purchase price, colors, notes and status.
 - Photos: JPEG/PNG upload up to 4 MB, real pictures in item cards, detailed item view, replace/remove photos.
-- Season and occasion fields and advanced closet filters; sort by recency, name or price.
+- Season and occasion fields and advanced closet filters; sort by recency, name, price, or rainbow color.
 - Dashboard counts and wardrobe value; demo wardrobe loader.
 - Phase 3: click or drag wardrobe items into five outfit slots; name, save, edit and delete looks. Saved outfits reference real garment IDs and immediately reflect their laundry/repair status.
 - Phase 4: dedicated Laundry Center with guided stage transitions (Worn → Laundry → Drying → Ready), an append-only status change log, affected outfits and available replacement suggestions. You explicitly approve suggested swaps, preserving saved outfit data until then.
 - Phase 5: log a saved outfit or individual garment by date; store durable wear events; view recent activity, garment-level counts and cost per recorded wear. Today’s logged wears move available items to WORN, while past logs do not affect current garment availability.\n- Phase 6: automatic, explainable recommendations that first enforce garment availability and category requirements, then rank combinations using occasion/season labels and recorded wears. Save any recommended look to Outfit Studio. If the wardrobe has no complete available outfit, the app explicitly explains what's missing.
 - Phase 7: assign real saved looks to Morning/Afternoon/Evening on any date, with alerts for current unavailability and same-day shared garments. Reassigning the same date and slot replaces the earlier assignment. Plan a multi-day trip by activity tags and generate a compact reusable packing list.
 - Phase 8: read-only Workspace Health audit for missing garment files, mismatched wear counts, deleted outfit pieces and orphan calendar references; a safe local H2+photos backup script and archive checker.
+- Studio release: a daily dashboard combining current outfit plans, season-aware (not weather-aware) recommendations, care queue, unworn-item suggestions and wardrobe pulse. Accessible five-section top navigation (Today, Closet, Looks, Care, Insights), responsive layout, warm forest/ivory/brass design. Logging wears and bulk care actions require confirmation. Bulk care actions report partial failures instead of claiming success.
 - Still planned: authentication, deployment and optional sponsor integrations.
 
 ## Photos and database
@@ -98,3 +99,25 @@ The packing endpoint accepts 1–14 days, each with an activity/occasion. It use
 ## Phase 8 — Data integrity and backup
 
 Open **Workspace health** in the sidebar to run the read-only Java consistency audit. A clean audit does not replace a backup. For a local archive containing the real H2 database and photos, stop Spring Boot and run `bash scripts/backup-local.sh` from the repository root. See [docs/DATA_SAFETY.md](docs/DATA_SAFETY.md) for verification, recovery, privacy and optional PostgreSQL guidance. Do not publish backups or expose THREADWORK to the internet without authentication.
+
+## THREADWORK Studio — final UI notes
+
+This build keeps every existing feature and database format. **Today** shows planned outfits from the calendar or wardrobe-based suggestions; a calendar outfit can be unavailable, in which case its wear button is disabled and you can explore alternatives. Pressing **Wear this today** requires explicit confirmation because wear events are intentionally permanent.
+
+The Today care queue can move all garments in the displayed status to the next laundry stage. The UI requests confirmation and processes garments one at a time. If a step fails, it reports how many completed and refreshes the database-backed state. This is not one atomic transaction; for fine-grained controls open Laundry Center.
+
+The current season filter is calculated from the browser month, **not live weather**. The 'never logged' panel uses recorded wear events and cannot know what you wore outside the app. Full wear logging, alternatives, packing and analytics remain separate dedicated tools.
+
+### To preview without touching the main project
+
+Unzip the source into a **different directory**, do not copy your existing `backend/data/`. With Java 21 and Maven installed:
+
+- In the extracted `backend` folder: `PORT=8082 mvn spring-boot:run`
+- In the extracted `frontend` folder: `npm install`, then `THREADWORK_API_TARGET=http://127.0.0.1:8082 npm run dev -- --port 5175`
+- Open `http://127.0.0.1:5175`. This copy creates its own local database, not yours.
+
+To use your real wardrobe, back up and stop the original server first, then work with a private *copy* of `backend/data` only if desired; never share the database, photos or backup publicly.
+
+### Build verification
+
+From the project root: `mvn -f backend/pom.xml test` and `npm install --prefix frontend && npm run build --prefix frontend`. The working branch can also be tested through GitHub Actions. Never treat a syntax-only check as a successful production build.
