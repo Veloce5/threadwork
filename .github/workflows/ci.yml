@@ -27,3 +27,12 @@ jobs:
         run: npm install --prefix frontend --no-audit --no-fund
       - name: Typecheck and build
         run: npm run build --prefix frontend
+  demo-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test demo catalog safety and resume behavior
+        run: python3 -m unittest discover -s scripts/tests -v
