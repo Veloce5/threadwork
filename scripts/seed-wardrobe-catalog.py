@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Import 40 distinctly styled demo garments with reusable Commons photographs.
+"""Import 40 distinct demo garments with local illustrated or Commons pictures.
 
 Uses only Python's standard library and THREADWORK's existing API. Existing garments,
 wear logs, outfits, and photos are never changed. Repeat executions fill missing
-photos and avoid duplicating items with the TW-DEMO40 marker.
+pictures and avoid duplicates by the TW-DEMO40 marker. When Commons is rate limited,
+the importer uses original offline illustrations, clearly labeled as such.
 """
 from __future__ import annotations
 
@@ -21,6 +22,7 @@ import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, quote, urlparse
 from urllib.request import Request, urlopen
+from demo_art import illustration_png
 
 TAG = 'TW-DEMO40'
 COMMONS_API = 'https://commons.wikimedia.org/w/api.php'
@@ -173,7 +175,10 @@ def multipart(file_bytes, extension):
 def record_id(code):return f'[{TAG}:{code}]'
 
 def notes_for(code, source=None, license_name='', author=''):
-    base=f'{record_id(code)} Demo catalog piece for feature testing, not an owned item. Reference photograph may differ in color or details.'
+    base=f'{record_id(code)} Demo catalog piece for feature testing, not an owned item.'
+    if source=='generated:threadwork-art':
+        return (base+' Original offline THREADWORK garment illustration; not a product photograph.')[:500]
+    base+=' Reference photograph may differ in color or details.'
     if source:
         credit=f' Photo: {source} | {license_name} | {author[:60]}'
         return (base+credit)[:500]
@@ -200,13 +205,14 @@ def preview(items, existing):
     print(f'Backend currently contains {len(existing)} garments; importing up to {len(items)} distinct demo pieces.')
     for category in ['TOPS','BOTTOMS','OUTERWEAR','DRESSES','FOOTWEAR','ACCESSORIES']:
         print(f'  {category.title():12s}: {sum(1 for x in items if x[2]==category)}')
-    print('Images: licensed Wikimedia Commons photos, with per-photo credit stored locally.')
+    print('Images: Wikimedia Commons photographs or original offline garment illustrations.')
 
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--api',default='http://127.0.0.1:8080',help='THREADWORK Java backend origin')
     parser.add_argument('--dry-run',action='store_true',help='Review catalog only; no uploads')
     parser.add_argument('--yes',action='store_true',help='Skip the interactive confirmation')
+    parser.add_argument('--offline-images',action='store_true',help='Generate 40 distinct clothing illustrations locally (no Wikimedia requests)')
     opts=parser.parse_args(argv)
     if len(DATA)!=40 or len({x[0] for x in DATA})!=40:
         raise RuntimeError('Catalog needs exactly 40 unique IDs')
@@ -230,15 +236,18 @@ def main(argv=None):
             print('Cancelled; nothing changed.');return 0
     current={match.group(1):g for g in existing if (match:=re.search(r'\['+TAG+r':([a-z0-9-]+)\]',g.get('notes') or ''))}
     missing=[x for x in DATA if x[0] not in current or not current[x[0]].get('imageUrl')]
-    if missing:
+    use_illustrations=opts.offline_images
+    if missing and not use_illustrations:
         print('Checking Commons image access before importing…')
         try:
             first=next(candidates_for(missing[0],set()),None)
             if first is None:raise RuntimeError('No usable freely licensed photo found')
             get_photo(first[1])
         except Exception as e:
-            print(f'STOP: Could not fetch Commons photos ({e}). No new garments were created; try again when the connection is available.',file=sys.stderr)
-            return 2
+            print(f'Commons photos unavailable ({e}); using original offline garment illustrations instead.',file=sys.stderr)
+            use_illustrations=True
+    if use_illustrations:
+        print('Illustration mode: all missing item pictures will be generated locally, without network access.')
     credits=load_credits(credits_path())
     used={v['file'] for v in credits.values() if v.get('file')}
     for g in existing:
@@ -271,37 +280,63 @@ def main(argv=None):
             except Exception as credit_error:
                 failures.append(f'{name}: photo credit is preserved in local CSV but notes update failed ({credit_error})')
         if not success_image:
-            try:
-                candidates=list(candidates_for(item,used))
-            except Exception as e:
-                candidates=[];failures.append(f'{name}: Commons lookup failed ({e})')
-            for title,url,license_name,meta in candidates[:10]:
+            if not use_illustrations:
                 try:
-                    blob,mime,extension=get_photo(url)
-                    data,content_type=multipart(blob,extension)
+                    candidates=list(candidates_for(item,used))
+                except Exception as e:
+                    print(f'Commons request failed ({e}); switching to offline illustrations for remaining items.')
+                    use_illustrations=True
+                    candidates=[]
+                for title,url,license_name,meta in candidates[:10]:
+                    try:
+                        blob,mime,extension=get_photo(url)
+                        data,content_type=multipart(blob,extension)
+                        uploaded=api_request(opts.api,f"/api/garments/{garment['id']}/photo",data,
+                                             content_type=content_type)
+                        if not uploaded.get('imageUrl'):raise RuntimeError('No imageUrl returned')
+                        file_page='https://commons.wikimedia.org/wiki/'+quote(title.replace(' ','_'),safe=':()')
+                        author=StripHTML().plain(meta.get('Artist',{}).get('value','Unknown'))
+                        license_url=meta.get('LicenseUrl',{}).get('value','')
+                        credits[code]={'code':code,'name':name,'source':file_page,'file':title,
+                                       'author':author,'license':license_name,'license_url':license_url}
+                        save_credits(credits_path(),credits)
+                        used.add(title);photos+=1;success_image=True
+                        updated={k:garment.get(k) for k in ['name','category','brand','color','purchasePrice',
+                                    'purchasedOn','season','occasion']}
+                        updated['notes']=notes_for(code,file_page,license_name,author)
+                        try:
+                            api_request(opts.api,f"/api/garments/{garment['id']}",updated,method='PUT')
+                        except Exception as credit_error:
+                            failures.append(f'{name}: photo attached, credit saved in CSV but notes update failed ({credit_error})')
+                        break
+                    except Exception as e:
+                        print(f'    Photo candidate unavailable ({type(e).__name__}): {str(e)[:90]}')
+                if not success_image:
+                    print(f'No usable Commons photo for {name}; creating a local illustration.')
+                    use_illustrations=True
+            if not success_image and use_illustrations:
+                try:
+                    blob=illustration_png(code,category,color)
+                    data,content_type=multipart(blob,'png')
                     uploaded=api_request(opts.api,f"/api/garments/{garment['id']}/photo",data,
                                          content_type=content_type)
                     if not uploaded.get('imageUrl'):raise RuntimeError('No imageUrl returned')
-                    file_page='https://commons.wikimedia.org/wiki/'+quote(title.replace(' ','_'),safe=':()')
-                    author=StripHTML().plain(meta.get('Artist',{}).get('value','Unknown'))
-                    license_url=meta.get('LicenseUrl',{}).get('value','')
-                    # Persist legal credits immediately after a successful image upload.
-                    # Even if updating the item's notes fails, the local credits file remains.
-                    credits[code]={'code':code,'name':name,'source':file_page,'file':title,
-                                   'author':author,'license':license_name,'license_url':license_url}
+                    credits[code]={'code':code,'name':name,'source':'generated:threadwork-art',
+                                   'file':code+'.png','author':'THREADWORK Studio offline renderer',
+                                   'license':'Original illustration (not a photo)','license_url':''}
                     save_credits(credits_path(),credits)
-                    used.add(title);photos+=1;success_image=True
+                    photos+=1;success_image=True
                     updated={k:garment.get(k) for k in ['name','category','brand','color','purchasePrice',
-                            'purchasedOn','season','occasion']}
-                    updated['notes']=notes_for(code,file_page,license_name,author)
+                                'purchasedOn','season','occasion']}
+                    updated['notes']=notes_for(code,'generated:threadwork-art')
                     try:
                         api_request(opts.api,f"/api/garments/{garment['id']}",updated,method='PUT')
                     except Exception as credit_error:
-                        failures.append(f'{name}: photo attached, attribution stored in CSV but item notes update failed ({credit_error})')
-                    break
+                        failures.append(f'{name}: illustration attached, credits saved but notes update failed ({credit_error})')
                 except Exception as e:
-                    print(f'    Image candidate skipped ({type(e).__name__}): {str(e)[:105]}')
-            if not success_image:failures.append(f'{name}: NO PHOTO (retry the script once Commons is reachable)')
+                    failures.append(f'{name}: illustration upload failed ({e})')
+            if not success_image:
+                failures.append(f'{name}: no image could be uploaded, retry later')
         if garment.get('status')!=status:
             try:
                 api_request(opts.api,f"/api/garments/{garment['id']}/status",{'status':status},method='PATCH')
@@ -317,7 +352,7 @@ def main(argv=None):
         for f in failures:print('  - '+f)
         print('Run the same command again to retry missing garments/photos without duplicating completed items.')
         return 1
-    print('All 40 catalog entries have photos. Existing wardrobe items were not changed.')
+    print('All 40 demo garments have pictures (original illustrations or Commons photos). Existing wardrobe items were not changed.')
     return 0
 
 if __name__=='__main__':
